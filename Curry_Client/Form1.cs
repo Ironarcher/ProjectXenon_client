@@ -242,6 +242,12 @@ namespace Curry_Client
             connect("127.0.0.1");
         }
 
-      
+        private void label1_Click(object sender, EventArgs e)
+        {
+            loginform lg = new loginform();
+            lg.ShowDialog();
+        }
+
+     
     }
 }
