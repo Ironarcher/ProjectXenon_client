@@ -303,6 +303,13 @@ namespace Curry_Client
             }
             */
             comboBox1.Items.Add("Localhost");
+
+            if (!comboBox1.Items.Contains("Curriculum"))
+            {
+                comboBox1.Items.Add("Curriculum");
+            }
+
+            comboBox1.Text = "Curriculum";
         }
 
         private void firstnamebox_TextChanged(object sender, EventArgs e)
@@ -336,6 +343,43 @@ namespace Curry_Client
             else
             {
                 comboBox1.BackColor = Color.Red;
+            }
+        }
+
+        private void firstnamebox_Leave(object sender, EventArgs e)
+        {
+            if (firstnamebox.Text == "")
+            {
+                firstnamebox.Text = "First Name";
+                firstnamecheck = false;
+                firstnamebox.ForeColor = SystemColors.InactiveCaption;
+            }
+        }
+
+        private void lastnamebox_Leave(object sender, EventArgs e)
+        {
+            if (lastnamebox.Text == "")
+            {
+                lastnamebox.Text = "Last Name";
+                lastnamecheck = false;
+                lastnamebox.ForeColor = SystemColors.InactiveCaption;
+            }
+        }
+
+        private void comboBox1_DropDown(object sender, EventArgs e)
+        {
+            if (comboBox1.Items.Contains("Curriculum"))
+                comboBox1.Items.Remove("Curriculum");
+        }
+
+        private void passwordbox_Leave(object sender, EventArgs e)
+        {
+            if (passwordbox.Text == "")
+            {
+                passwordbox.Text = "Password";
+                passwordcheck = false;
+                passwordbox.UseSystemPasswordChar = false;
+                passwordbox.ForeColor = SystemColors.InactiveCaption;
             }
         }
     }

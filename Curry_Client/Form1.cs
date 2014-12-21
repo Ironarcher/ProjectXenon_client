@@ -72,6 +72,7 @@ namespace Curry_Client
             AllocConsole();
             Console.WriteLine("Client Launch");
             //connect("127.0.0.1");
+
         }
 
         [DllImport("kernel32.dll", SetLastError = true)]
@@ -237,21 +238,37 @@ namespace Curry_Client
             public StringBuilder sb = new StringBuilder();
         }
 
-        private void button1_Click(object sender, EventArgs e)
-        {
-            connect("127.0.0.1");
-        }
-
         private void label1_Click(object sender, EventArgs e)
         {
             loginform lg = new loginform();
             lg.ShowDialog();
         }
 
+
         public byte[] logincode
         {
             get { return logincode; }
             set { logincode = value; }
+        }
+
+        private void button1_Click_1(object sender, EventArgs e)
+        {
+            connect("108.248.159.5");
+        }
+
+        private void label1_MouseHover(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label1_MouseLeave(object sender, EventArgs e)
+        {
+            label1.ForeColor = Color.FromArgb(192, 64, 0);
+        }
+
+        private void label1_MouseEnter(object sender, EventArgs e)
+        {
+            label1.ForeColor = Color.FromArgb(255, 100, 100);
         }
     }
 }
