@@ -34,7 +34,7 @@ namespace Curry_Client
         private static String response = String.Empty;
 
 
-        private byte[] verificationcode = new byte[2];
+        private byte[] verificationcode = new byte[3];
         public loginform()
         {
             InitializeComponent();
@@ -73,7 +73,7 @@ namespace Curry_Client
             lastname.CopyTo(packet, 21);
             byte[] password = Encoding.ASCII.GetBytes(passwordbox.Text);
             password.CopyTo(packet, 41);
-            byte[] closing = Encoding.ASCII.GetBytes("<EOP>");
+            byte[] closing = Encoding.ASCII.GetBytes("<EOF>");
             closing.CopyTo(packet, 61);
 
             return packet;
@@ -122,7 +122,7 @@ namespace Curry_Client
                 } else{
                     Console.WriteLine("A fatal error has occurred: Incorrect packet type returned by server to login verification protocol");
                 }
-                Console.WriteLine("Response received : " + response);
+                Console.WriteLine("Response received : " + Encoding.ASCII.GetString(receivedpacket, 0, receivedpacket.Length));
 
                 // Release the socket.
                 client.Shutdown(SocketShutdown.Both);
