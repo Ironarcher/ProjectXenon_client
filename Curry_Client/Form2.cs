@@ -18,6 +18,7 @@ namespace Curry_Client
     public partial class loginform : Form
     {
         private bool firstnamecheck, lastnamecheck, passwordcheck, curriculumcheck = false;
+        Dictionary<String, String> masterServerList = new Dictionary<String, String>();
 
         private const int port = 32320;
         // ManualResetEvent instances signal completion.
@@ -59,22 +60,43 @@ namespace Curry_Client
         {
             AllocConsole();
             Console.WriteLine("Client Launch");
-            //connect("127.0.0.1");
+
+            //Write dictionary of servers to connect to
+            //Pull from master server (list of servers to connect to)
+            masterServerList.Add("Localhost", "127.0.0.1");
+            /*
+            foreach (String s in masterServerList.Keys)
+            {
+                comboBox1.Items.Add(s);
+            }
+            */
+            comboBox1.Items.Add("Localhost");
         }
 
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool AllocConsole();
 
-        private static byte[] getLoginProtocol()
+        private byte[] getLoginProtocol()
         {
+            byte[] packet = new byte[78];
             //Starting byteflag 1 is the login protocol (client to server)
             //Next 20 bytes is first name
             //Next 20 bytes is last name
             //Next 20 bytes is password
-            //Next 13 bytes is IP Address
-            byte startflag = 1;
+            //Next 5 bytes is <EOP> closing flag
+            //Total bytes in packet: 65
+            packet[0] = 1;
+            byte[] firstname = Encoding.ASCII.GetBytes(firstnamebox.Text);
+            firstname.CopyTo(packet, 1);
+            byte[] lastname = Encoding.ASCII.GetBytes(lastnamebox.Text);
+            lastname.CopyTo(packet, 21);
+            byte[] password = Encoding.ASCII.GetBytes(passwordbox.Text);
+            password.CopyTo(packet, 41);
+            byte[] closing = Encoding.ASCII.GetBytes("<EOP>");
+            closing.CopyTo(packet, 61);
 
+            return packet;
         }
 
         //IP_AD is the IP address of the server
@@ -288,6 +310,19 @@ namespace Curry_Client
                 firstnamebox.Text = "";
                 firstnamebox.ForeColor = Color.Black;
                 firstnamecheck = true;
+            }
+        }
+
+        private void Enter_Click(object sender, EventArgs e)
+        {
+            if (comboBox1.SelectedText != null)
+            {
+                Console.WriteLine(masterServerList[comboBox1.SelectedText.ToString()]);
+                //connect(masterServerList[comboBox1.SelectedText.ToString()]);
+            }
+            else
+            {
+                comboBox1.BackColor = Color.Red;
             }
         }
     }

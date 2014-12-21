@@ -83,7 +83,7 @@
             this.comboBox1.ForeColor = System.Drawing.SystemColors.InactiveCaption;
             this.comboBox1.FormattingEnabled = true;
             this.comboBox1.Items.AddRange(new object[] {
-            "Localhost - 127.0.0.1"});
+            "Localhost"});
             this.comboBox1.Location = new System.Drawing.Point(122, 212);
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(261, 21);
@@ -99,6 +99,7 @@
             this.Enter.TabIndex = 5;
             this.Enter.Text = "Enter";
             this.Enter.UseVisualStyleBackColor = true;
+            this.Enter.Click += new System.EventHandler(this.Enter_Click);
             // 
             // loginform
             // 
