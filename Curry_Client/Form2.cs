@@ -18,6 +18,7 @@ namespace Curry_Client
     public partial class loginform : Form
     {
         private bool firstnamecheck, lastnamecheck, passwordcheck, curriculumcheck = false;
+        public static byte[] receivedpacket = new byte[256];
         Dictionary<String, String> masterServerList = new Dictionary<String, String>();
 
         private const int port = 32320;
@@ -33,7 +34,7 @@ namespace Curry_Client
         private static String response = String.Empty;
 
 
-        private byte[] verificationcode;
+        private byte[] verificationcode = new byte[2];
         public loginform()
         {
             InitializeComponent();
@@ -55,27 +56,6 @@ namespace Curry_Client
         {
             this.mainForm.logincode = verificationcode;
         }
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
-            AllocConsole();
-            Console.WriteLine("Client Launch");
-
-            //Write dictionary of servers to connect to
-            //Pull from master server (list of servers to connect to)
-            masterServerList.Add("Localhost", "127.0.0.1");
-            /*
-            foreach (String s in masterServerList.Keys)
-            {
-                comboBox1.Items.Add(s);
-            }
-            */
-            comboBox1.Items.Add("Localhost");
-        }
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool AllocConsole();
 
         private byte[] getLoginProtocol()
         {
@@ -100,7 +80,7 @@ namespace Curry_Client
         }
 
         //IP_AD is the IP address of the server
-        private static void connect(string IP_AD)
+        private void connect(string IP_AD)
         {
             try
             {
@@ -115,7 +95,7 @@ namespace Curry_Client
                     new AsyncCallback(ConnectCallback), client);
 
                 // Send test data to the remote device.
-                Send(client, "This is a test<EOF>");
+                SendBytes(client, getLoginProtocol());
                 sendDone.WaitOne();
 
                 // Receive the response from the remote device.
@@ -123,6 +103,25 @@ namespace Curry_Client
                 receiveDone.WaitOne();
 
                 // Write the response to the console.
+                //Response: First byte (0) is verification that the packet is a type 1 packet
+                //Second byte is pass (0) or fail(1) for authorization
+                //Next (3) bytes are authoization bytes (512 bit authorization)
+                if (receivedpacket[0] == 1)
+                {
+                    if (receivedpacket[1] == 0)
+                    {
+                        //Wrong name or password entered by user
+                    }
+                    else
+                    {
+                        //Verified that login is good
+                        verificationcode[0] = receivedpacket[2];
+                        verificationcode[1] = receivedpacket[3];
+                        verificationcode[2] = receivedpacket[4];
+                    }
+                } else{
+                    Console.WriteLine("A fatal error has occurred: Incorrect packet type returned by server to login verification protocol");
+                }
                 Console.WriteLine("Response received : " + response);
 
                 // Release the socket.
@@ -192,6 +191,7 @@ namespace Curry_Client
                 if (bytesRead > 0)
                 {
                     // There might be more data, so store the data received so far.
+
                     state.sb.Append(Encoding.ASCII.GetString(state.buffer, 0, bytesRead));
 
                     // Get the rest of the data.
@@ -204,6 +204,7 @@ namespace Curry_Client
                     if (state.sb.Length > 1)
                     {
                         response = state.sb.ToString();
+                        receivedpacket = state.buffer;
                     }
                     // Signal that all bytes have been received.
                     receiveDone.Set();
@@ -290,7 +291,18 @@ namespace Curry_Client
 
         private void loginform_Load(object sender, EventArgs e)
         {
-            //lastnamebox.Focus();
+            Console.WriteLine("Client Launch");
+
+            //Write dictionary of servers to connect to
+            //Pull from master server (list of servers to connect to)
+            masterServerList.Add("Localhost", "127.0.0.1");
+            /*
+            foreach (String s in masterServerList.Keys)
+            {
+                comboBox1.Items.Add(s);
+            }
+            */
+            comboBox1.Items.Add("Localhost");
         }
 
         private void firstnamebox_TextChanged(object sender, EventArgs e)
@@ -315,10 +327,11 @@ namespace Curry_Client
 
         private void Enter_Click(object sender, EventArgs e)
         {
-            if (comboBox1.SelectedText != null)
+            if (comboBox1.SelectedItem.ToString() != null && comboBox1.SelectedItem.ToString() != "Curriculum" && comboBox1.SelectedItem.ToString() != "")  
             {
-                Console.WriteLine(masterServerList[comboBox1.SelectedText.ToString()]);
-                //connect(masterServerList[comboBox1.SelectedText.ToString()]);
+                Console.WriteLine(comboBox1.SelectedItem.ToString());
+                Console.WriteLine(masterServerList[comboBox1.SelectedItem.ToString()]);
+                connect(masterServerList[comboBox1.SelectedItem.ToString()]);
             }
             else
             {

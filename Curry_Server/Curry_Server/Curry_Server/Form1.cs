@@ -12,6 +12,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Runtime.InteropServices;
+using System.Xml;
 
 namespace Curry_Server
 {
@@ -26,6 +27,7 @@ namespace Curry_Server
         {
             AllocConsole();
             Console.WriteLine("Server Launch");
+            Dictionary<Int32, Byte[]> userList = new Dictionary<Int32, Byte[]>();
         }
 
         [DllImport("kernel32.dll", SetLastError = true)]
@@ -147,6 +149,22 @@ namespace Curry_Server
                 content = state.sb.ToString();
                 if (content.IndexOf("<EOF>") > -1)
                 {
+                    //Process data here:
+                    if (state.buffer[0] == 1)
+                    {
+                        //Packet type: Login verification protocol
+                        String firstname = Encoding.ASCII.GetString(state.buffer, 1, 20);
+                        String lastname = Encoding.ASCII.GetString(state.buffer, 21, 20);
+                        String password = Encoding.ASCII.GetString(state.buffer, 41, 20);
+                        Console.WriteLine("Received login protocol: " + firstname + ", " + lastname + ", " + password);
+
+                        //Check if the credentials correspond to actual 
+
+                        //Create verification code
+
+                    }
+
+
                     // All the data has been read from the 
                     // client. Display it on the console.
                     Console.WriteLine("Read {0} bytes from socket. \n Data : {1}",
