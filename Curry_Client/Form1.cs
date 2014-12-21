@@ -248,6 +248,10 @@ namespace Curry_Client
             lg.ShowDialog();
         }
 
-     
+        public byte[] logincode
+        {
+            get { return logincode; }
+            set { logincode = value; }
+        }
     }
 }
