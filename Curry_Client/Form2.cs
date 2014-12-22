@@ -285,22 +285,25 @@ namespace Curry_Client
                 comboBox1.ForeColor = Color.Black;
                 curriculumcheck = true;
             }
-        }   
-
+        }
+        public void addServer(String name, String IP) {
+             masterServerList.Add(name, IP);
+             comboBox1.Items.Add(name);
+        }
         private void loginform_Load(object sender, EventArgs e)
         {
             Console.WriteLine("Client Launch");
 
             //Write dictionary of servers to connect to
             //Pull from master server (list of servers to connect to)
-            masterServerList.Add("Localhost", "127.0.0.1");
+            addServer("Localhost", "127.0.0.1");
             /*
             foreach (String s in masterServerList.Keys)
             {
                 comboBox1.Items.Add(s);
             }
             */
-            comboBox1.Items.Add("Localhost");
+
 
             if (!comboBox1.Items.Contains("Curriculum"))
             {
@@ -379,6 +382,11 @@ namespace Curry_Client
                 passwordbox.UseSystemPasswordChar = false;
                 passwordbox.ForeColor = SystemColors.InactiveCaption;
             }
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
         }
     }
 

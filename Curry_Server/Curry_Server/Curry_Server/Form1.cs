@@ -18,15 +18,34 @@ namespace Curry_Server
 {
     public partial class Form1 : Form
     {
+        public String getIP()
+        {
+            IPHostEntry host;
+            string localIP = "?";
+            host = Dns.GetHostEntry(Dns.GetHostName());
+            foreach (IPAddress ip in host.AddressList)
+            {
+                if (ip.AddressFamily.ToString() == "InterNetwork")
+                {
+                    localIP = ip.ToString();
+                }
+            }
+            return localIP;
+        }
         public Form1()
         {
             InitializeComponent();
         }
-
+        public void WriteToUserConsole(String s)
+        {
+            consoleBox.Text = consoleBox.Text + "\n" + s;
+        }
         private void Form1_Load(object sender, EventArgs e)
         {
             AllocConsole();
             Console.WriteLine("Server Launch");
+            WriteToUserConsole("Teach-Play Server launched at " + getIP());
+            consoleBox.BackColor = System.Drawing.SystemColors.Window;
             Dictionary<Int32, Byte[]> userList = new Dictionary<Int32, Byte[]>();
         }
 
@@ -37,6 +56,12 @@ namespace Curry_Server
         private void button1_Click(object sender, EventArgs e)
         {
             AsynchronousSocketListener listen = new AsynchronousSocketListener();
+            WriteToUserConsole("Server Launched!");
+        }
+
+        private void consoleBox_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 
@@ -128,66 +153,71 @@ namespace Curry_Server
 
         public static void ReadCallback(IAsyncResult ar)
         {
-            String content = String.Empty;
-
-            // Retrieve the state object and the handler socket
-            // from the asynchronous state object.
-            StateObject state = (StateObject)ar.AsyncState;
-            Socket handler = state.workSocket;
-
-            // Read data from the client socket. 
-            int bytesRead = handler.EndReceive(ar);
-  
-            Console.WriteLine("Processing Packet of " + bytesRead + " bytes");
-            if (bytesRead > 0)
+            try
             {
-                // There  might be more data, so store the data received so far.
-                state.sb.Append(Encoding.ASCII.GetString(
-                    state.buffer, 0, bytesRead));
+                String content = String.Empty;
 
-                // Check for end-of-file tag. If it is not there, read 
-                // more data.
-                content = state.sb.ToString();
-                Console.WriteLine(content);
-                if (content.IndexOf("<EOF>") > -1)
+                // Retrieve the state object and the handler socket
+                // from the asynchronous state object.
+                StateObject state = (StateObject)ar.AsyncState;
+                Socket handler = state.workSocket;
+
+                // Read data from the client socket. 
+                int bytesRead = handler.EndReceive(ar);
+
+                Console.WriteLine("Processing Packet of " + bytesRead + " bytes");
+                if (bytesRead > 0)
                 {
-                    Console.WriteLine("<EOF> Found with a buffer of " + state.buffer[0]);
-                    //Process data here:
-                    if (state.buffer[0] == 1)
+                    // There  might be more data, so store the data received so far.
+                    state.sb.Append(Encoding.ASCII.GetString(
+                        state.buffer, 0, bytesRead));
+
+                    // Check for end-of-file tag. If it is not there, read 
+                    // more data.
+                    content = state.sb.ToString();
+                    Console.WriteLine(content);
+                    if (content.IndexOf("<EOF>") > -1)
                     {
-                        //Packet type: Login verification protocol
-                        Console.WriteLine("Verifying...");
-                        //String packet = Encoding.ASCII.GetString(state.buffer, 1,  state.buffer.Length-1);
-                        String packet = content;
-                        String[] items = packet.Split('\0');
-                        String firstname = items[0];
-                        String lastname = items[1];
-                        String password = items[2];
+                        Console.WriteLine("<EOF> Found with a buffer of " + state.buffer[0]);
+                        //Process data here:
+                        if (state.buffer[0] == 1)
+                        {
+                            //Packet type: Login verification protocol
+                            Console.WriteLine("Loading login data...");
+                            //String packet = Encoding.ASCII.GetString(state.buffer, 1,  state.buffer.Length-1);
+                            String[] items = content.Split('\0');
+                            String firstname = items[0];
+                            String lastname = items[1]; //NEEDS TRY CATCH
+                            String password = items[2];
 
-                        Console.WriteLine(packet);
-                       // String lastname = Encoding.ASCII.GetString(state.buffer, 22,  Int32.Parse(Encoding.ASCII.GetString(state.buffer, 21, 1)););
-                        //String password = Encoding.ASCII.GetString(state.buffer, 42,  Int32.Parse(Encoding.ASCII.GetString(state.buffer, 41, 1)););
-                        Console.WriteLine("Received login protocol: " + firstname + ", " + lastname + ", " + password);
-                        //Check if the credentials correspond to actual 
+                            // String lastname = Encoding.ASCII.GetString(state.buffer, 22,  Int32.Parse(Encoding.ASCII.GetString(state.buffer, 21, 1)););
+                            //String password = Encoding.ASCII.GetString(state.buffer, 42,  Int32.Parse(Encoding.ASCII.GetString(state.buffer, 41, 1)););
+                            Console.WriteLine("Received login protocol: " + firstname + ", " + lastname + ", " + password);
+                            //Check if the credentials correspond to actual 
 
-                        //Create verification code
+                            //Create verification code
 
+                        }
+
+
+                        // All the data has been read from the 
+                        // client. Display it on the console.
+                        Console.WriteLine("Read {0} bytes from socket. \n Data : {1}",
+                            content.Length, content);
+                        // Echo the data back to the client.
+                        Send(handler, content);
                     }
-
-
-                    // All the data has been read from the 
-                    // client. Display it on the console.
-                    Console.WriteLine("Read {0} bytes from socket. \n Data : {1}",
-                        content.Length, content);
-                    // Echo the data back to the client.
-                    Send(handler, content);
+                    else
+                    {
+                        // Not all data received. Get more.
+                        handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
+                        new AsyncCallback(ReadCallback), state);
+                    }
                 }
-                else
-                {
-                    // Not all data received. Get more.
-                    handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
-                    new AsyncCallback(ReadCallback), state);
-                }
+            }
+            catch
+            {
+                return;
             }
         }
 
