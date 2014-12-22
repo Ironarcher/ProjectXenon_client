@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<library>
+	<user id="1">
+		<firstname>Arpad</firstname>
+		<lastname>Kovesdy</lastname>
+		<password>yeast2525</password>
+		<superuser>true</superuser>
+	</user>
+	<user id="2">
+		<firstname>Joseph</firstname>
+		<lastname>Stafford</lastname>
+		<password>password</password>
+		<superuser>true</superuser>
+	</user>
+</library>

@@ -137,7 +137,7 @@ namespace Curry_Server
 
             // Read data from the client socket. 
             int bytesRead = handler.EndReceive(ar);
-
+            Console.WriteLine("Packet Processing");
             if (bytesRead > 0)
             {
                 // There  might be more data, so store the data received so far.

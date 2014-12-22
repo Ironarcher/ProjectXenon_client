@@ -1,0 +1,55 @@
+Project Xenon Checklist:
+
+-Add a login page that is selected when the user hits "login" at the top
+	- Include the Teach-Play logo, copyright information, a log-in title, name (first, last)
+		a password field, curriculum dropdown box, and enter button
+-Add a feature that changes the login text to logout
+-Add functionality to login/logout toggle
+
+Create a default picture for a user without a picture
+
+Add Mission UI:
+-Add mission queue (available missions) at the top: Listbox
+-Keep the rest of the space as a mission space (used later)
+
+Add Collaboration UI:
+-Leave empty
+
+Add Inventory UI:
+-Create a 6x6 slot system as inventory space with forward and backward arrows
+-Add avatar at the top right
+-Add a description box for items that are clicked on (for info and to use them/wear them)
+-Detailed level breakdown and xp gain (xp to next level, etc.)
+
+Add Badges UI:
+-Add the badges grid (Badges to get boxes and a selection for badges that have already been found)
+-Percentage completion of achievements
+
+Add Leaderboard UI:
+-Add a detailed grid with the blanks: User, Level, XP, Badge Percentage completion (rank users based on XP)
+
+Add Settings UI:
+-Add things once questions are asked about user preferences
+-Add change picture selection and change e-mail address selection
+
+NETWORKING:
+-Remove the freezing up bug on the server and client end
+
+Packet types to create:
+-Add login protocol with server (giving it a unique number if is correct, otherwise sending back
+that it is incorrect)
+-FUNCTIONS THAT THE SERVER GIVES:
+	getXP()
+	getLevelMin()
+	getLevelMax()
+	getCurrentLevel()
+	getCurrentXPinLevel()
+	getAvailableMissionIDs()
+	getMissionInfo(int ID)
+	getInv()
+-FUNCTION FROM CLIENT TO SERVER:
+	submitMission(packet include worded information)
+	submitQuiz(packet include answers given)
+	
+
+

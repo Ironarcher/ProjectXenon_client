@@ -59,7 +59,7 @@ namespace Curry_Client
 
         private byte[] getLoginProtocol()
         {
-            byte[] packet = new byte[78];
+            byte[] packet = new byte[65];
             //Starting byteflag 1 is the login protocol (client to server)
             //Next 20 bytes is first name
             //Next 20 bytes is last name
