@@ -13,7 +13,6 @@ using System.Text;
 using System.Threading;
 using System.Runtime.InteropServices;
 using System.Xml;
-using System.IO;
 
 namespace Curry_Server
 {
@@ -113,7 +112,6 @@ namespace Curry_Server
 
         public static void AcceptCallback(IAsyncResult ar)
         {
-            Console.WriteLine("Request Received: Processing");
             // Signal the main thread to continue.
             allDone.Set();
 
@@ -151,35 +149,15 @@ namespace Curry_Server
                 content = state.sb.ToString();
                 if (content.IndexOf("<EOF>") > -1)
                 {
-                    byte[] loginpacket = new byte[5];
-                    loginpacket[0] = 1;
-                    Console.WriteLine(Encoding.ASCII.GetString(state.buffer));
                     //Process data here:
                     if (state.buffer[0] == 1)
                     {
                         //Packet type: Login verification protocol
-                        String firstnamep = Encoding.ASCII.GetString(state.buffer, 1, 20);
-                        String lastnamep = Encoding.ASCII.GetString(state.buffer, 21, 20);
-                        String passwordp = Encoding.ASCII.GetString(state.buffer, 41, 20);
-                        String firstname = firstnamep.Trim();
-                        String lastname = lastnamep.Trim();
-                        String password = passwordp.Trim();
+                        String firstname = Encoding.ASCII.GetString(state.buffer, 1, 20);
+                        String lastname = Encoding.ASCII.GetString(state.buffer, 21, 20);
+                        String password = Encoding.ASCII.GetString(state.buffer, 41, 20);
                         Console.WriteLine("Received login protocol: " + firstname + ", " + lastname + ", " + password);
-                        int id = findUser(firstname, lastname, password);
-                        Console.WriteLine(id);
-                        if (id == 0)
-                        {
-                            loginpacket[1] = 0;
-                        }
-                        else
-                        {
-                            Random random = new Random();
-                            loginpacket[1] = 1;
-                            loginpacket[2] = Convert.ToByte(random.Next(0,256));
-                            loginpacket[3] = Convert.ToByte(random.Next(0,256));
-                            loginpacket[4] = Convert.ToByte(random.Next(0, 256));
-                            //USER FOUND WITH ID 'id'
-                        }
+
                         //Check if the credentials correspond to actual 
 
                         //Create verification code
@@ -192,23 +170,15 @@ namespace Curry_Server
                     Console.WriteLine("Read {0} bytes from socket. \n Data : {1}",
                         content.Length, content);
                     // Echo the data back to the client.
-                    //Send(handler, content);
-                    SendBytes(handler, loginpacket);
+                    Send(handler, content);
                 }
-                else{
-                
+                else
+                {
                     // Not all data received. Get more.
                     handler.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
                     new AsyncCallback(ReadCallback), state);
                 }
             }
-        }
-
-        private static void SendBytes(Socket handler, byte[] byteData)
-        {
-            // Begin sending the data to the remote device.
-            handler.BeginSend(byteData, 0, byteData.Length, 0,
-                new AsyncCallback(SendCallback), handler);
         }
 
         private static void Send(Socket handler, String data)
@@ -240,93 +210,6 @@ namespace Curry_Server
             {
                 Console.WriteLine(e.ToString());
             }
-        }
-        public static int findUser(String firstname, String lastname, String password)
-        {
-            try
-            {
-                String xmlfile = "C://Users//Arpad//Desktop//texst.xml";
-                System.Xml.XmlTextReader reader = new System.Xml.XmlTextReader(xmlfile);
-                int tempid = 0;
-                bool flag = false;
-                bool flag1 = false;
-                bool flag2 = false;
-                int i = 0;
-                int tempint = -10;
-                string tempstring = "";
-                while (reader.Read())
-                {
-
-                    i++;
-                    if (reader.NodeType == XmlNodeType.Text)
-                    {
-                        if (tempint + 1 == i)
-                        {
-                            if (tempstring == "firstname")
-                            {
-                                flag = firstname.CompareTo(reader.Value) == 0;
-                                //Console.WriteLine(i);
-                                Console.WriteLine("'" + firstname + "'");
-                                Console.WriteLine(reader.Value);
-                                Console.WriteLine(flag);
-                                Console.WriteLine(firstname.Length + "    " + reader.Value.Length);
-                            }
-                            else if (tempstring == "lastname")
-                            {
-                                flag1 = lastname.CompareTo(reader.Value) == 0;
-                                Console.WriteLine(lastname);
-                                Console.WriteLine(reader.Value);
-                                Console.WriteLine(flag1);
-                            }
-                            else if (tempstring == "password")
-                            {
-                                flag2 = password.CompareTo(reader.Value) == 0;
-                                Console.WriteLine(password);
-                                Console.WriteLine(reader.Value);
-                                Console.WriteLine(flag2);
-                            }
-                            tempstring = "";
-                            tempint = -10;
-                        }
-                    }
-                    if (reader.NodeType == XmlNodeType.Element)
-                    {
-                        if (reader.Name == "user")
-                        {
-                            if (flag && flag1 && flag2)
-                            {
-                                return tempid;
-                            }
-                            tempid = Int32.Parse(reader.GetAttribute(0));
-                            flag = false;
-                            flag1 = false;
-                            flag2 = false;
-
-                        }
-                        if (reader.Name == "firstname")
-                        {
-                            tempint = i;
-                            tempstring = "firstname";
-                        }
-                        if (reader.Name == "lastname")
-                        {
-                            tempint = i;
-                            tempstring = "lastname";
-                        }
-                        if (reader.Name == "password")
-                        {
-                            tempint = i;
-                            tempstring = "password";
-                        }
-                    }
-                }
-                return 0;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
-            return -1;
         }
     }
 }
