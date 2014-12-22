@@ -34,7 +34,7 @@ namespace Curry_Client
         private static String response = String.Empty;
 
 
-        private byte[] verificationcode = new byte[2];
+        private byte[] verificationcode = new byte[3];
         public loginform()
         {
             InitializeComponent();
@@ -87,6 +87,7 @@ namespace Curry_Client
                 IPEndPoint remoteEP = new IPEndPoint(ipAddress, port);
                 Socket client = new Socket(AddressFamily.InterNetwork,
                     SocketType.Stream, ProtocolType.Tcp);
+                Console.WriteLine("HI");
 
                 //Connect through the remote socket (endpoint)
                 client.BeginConnect(remoteEP,
@@ -94,11 +95,11 @@ namespace Curry_Client
 
                 // Send test data to the remote device.
                 SendBytes(client, getLoginProtocol());
-                sendDone.WaitOne();
+                //sendDone.WaitOne();
 
                 // Receive the response from the remote device.
                 Receive(client);
-                receiveDone.WaitOne();
+                //receiveDone.WaitOne();
 
                 // Write the response to the console.
                 //Response: First byte (0) is verification that the packet is a type 1 packet
@@ -109,6 +110,10 @@ namespace Curry_Client
                     if (receivedpacket[1] == 0)
                     {
                         //Wrong name or password entered by user
+                        label2.Text = "Name or Password Incorrect.";
+                        verificationcode[0] = Convert.ToByte(0);
+                        verificationcode[1] = Convert.ToByte(0);
+                        verificationcode[2] = Convert.ToByte(0);
                     }
                     else
                     {
@@ -116,16 +121,18 @@ namespace Curry_Client
                         verificationcode[0] = receivedpacket[2];
                         verificationcode[1] = receivedpacket[3];
                         verificationcode[2] = receivedpacket[4];
+                        Console.WriteLine("Login Packet Authorization complete");
                     }
                 } else{
                     Console.WriteLine("A fatal error has occurred: Incorrect packet type returned by server to login verification protocol");
                 }
-                Console.WriteLine("Response received : " + response);
+                Console.WriteLine("Verification code: " + Convert.ToInt32(verificationcode[0]) + Convert.ToInt32(verificationcode[1]) + Convert.ToInt32(verificationcode[2]));
 
                 // Release the socket.
                 client.Shutdown(SocketShutdown.Both);
                 client.Close();
-
+                //client.Dispose();
+                //client = null;
 
             }
             catch (Exception e)
@@ -183,6 +190,7 @@ namespace Curry_Client
                 StateObject state = (StateObject)ar.AsyncState;
                 Socket client = state.workSocket;
 
+                Console.WriteLine(client.SocketType.ToString());
                 // Read data from the remote device.
                 int bytesRead = client.EndReceive(ar);
 
@@ -293,7 +301,7 @@ namespace Curry_Client
         private void loginform_Load(object sender, EventArgs e)
         {
             Console.WriteLine("Client Launch");
-
+            label2.Text = "Fill In All Fields.";
             //Write dictionary of servers to connect to
             //Pull from master server (list of servers to connect to)
             addServer("Localhost", "127.0.0.1");
@@ -339,10 +347,12 @@ namespace Curry_Client
             {
                 Console.WriteLine(comboBox1.SelectedItem.ToString());
                 Console.WriteLine(masterServerList[comboBox1.SelectedItem.ToString()]);
+                label2.Text = "Logging In.";
                 connect(masterServerList[comboBox1.SelectedItem.ToString()]);
             }
             else
             {
+                label2.Text = "A Curriculum Must Be Chosen.";
                 comboBox1.BackColor = Color.Red;
             }
         }
@@ -387,6 +397,11 @@ namespace Curry_Client
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
 
+        }
+
+        private void label2_TextChanged(object sender, EventArgs e)
+        {
+            label2.Left = (248 / 2) - (label2.Width / 2);
         }
     }
 

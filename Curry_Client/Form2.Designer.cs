@@ -34,6 +34,7 @@
             this.passwordbox = new System.Windows.Forms.TextBox();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.Enter = new System.Windows.Forms.Button();
+            this.label2 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // label1
@@ -106,12 +107,25 @@
             this.Enter.UseVisualStyleBackColor = true;
             this.Enter.Click += new System.EventHandler(this.Enter_Click);
             // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Font = new System.Drawing.Font("Gadugi", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label2.Location = new System.Drawing.Point(93, 185);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(39, 14);
+            this.label2.TabIndex = 6;
+            this.label2.Text = "Status";
+            this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.label2.TextChanged += new System.EventHandler(this.label2_TextChanged);
+            // 
             // loginform
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.LightBlue;
-            this.ClientSize = new System.Drawing.Size(232, 192);
+            this.ClientSize = new System.Drawing.Size(232, 205);
+            this.Controls.Add(this.label2);
             this.Controls.Add(this.Enter);
             this.Controls.Add(this.comboBox1);
             this.Controls.Add(this.passwordbox);
@@ -140,5 +154,6 @@
         private System.Windows.Forms.TextBox passwordbox;
         private System.Windows.Forms.ComboBox comboBox1;
         private System.Windows.Forms.Button Enter;
+        private System.Windows.Forms.Label label2;
     }
 }
