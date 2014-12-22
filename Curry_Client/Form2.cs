@@ -60,22 +60,20 @@ namespace Curry_Client
         private byte[] getLoginProtocol()
         {
             byte[] packet = new byte[65];
-            //Starting byteflag 1 is the login protocol (client to server)
-            //Next 20 bytes is first name
-            //Next 20 bytes is last name
-            //Next 20 bytes is password
-            //Next 5 bytes is <EOP> closing flag
-            //Total bytes in packet: 65
+            //Size is 30 for Arpad's data, each string is seperated by a null '\0' character
             packet[0] = 1;
+            byte[] fnl = Encoding.ASCII.GetBytes("\0");
             byte[] firstname = Encoding.ASCII.GetBytes(firstnamebox.Text);
             firstname.CopyTo(packet, 1);
+            fnl.CopyTo(packet, firstnamebox.Text.Length + 1);
             byte[] lastname = Encoding.ASCII.GetBytes(lastnamebox.Text);
-            lastname.CopyTo(packet, 21);
+            lastname.CopyTo(packet, firstnamebox.Text.Length + 2);
+            fnl.CopyTo(packet, firstnamebox.Text.Length + lastnamebox.Text.Length + 2);
             byte[] password = Encoding.ASCII.GetBytes(passwordbox.Text);
-            password.CopyTo(packet, 41);
-            byte[] closing = Encoding.ASCII.GetBytes("<EOP>");
-            closing.CopyTo(packet, 61);
-
+            password.CopyTo(packet, firstnamebox.Text.Length + lastnamebox.Text.Length + 3);
+            fnl.CopyTo(packet, firstnamebox.Text.Length + lastnamebox.Text.Length + passwordbox.Text.Length + 3);
+            byte[] closing = Encoding.ASCII.GetBytes("<EOF>");
+            closing.CopyTo(packet, firstnamebox.Text.Length + lastnamebox.Text.Length + passwordbox.Text.Length + 4);
             return packet;
         }
 

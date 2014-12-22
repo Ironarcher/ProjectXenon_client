@@ -137,7 +137,8 @@ namespace Curry_Server
 
             // Read data from the client socket. 
             int bytesRead = handler.EndReceive(ar);
-            Console.WriteLine("Packet Processing");
+  
+            Console.WriteLine("Processing Packet of " + bytesRead + " bytes");
             if (bytesRead > 0)
             {
                 // There  might be more data, so store the data received so far.
@@ -147,17 +148,26 @@ namespace Curry_Server
                 // Check for end-of-file tag. If it is not there, read 
                 // more data.
                 content = state.sb.ToString();
+                Console.WriteLine(content);
                 if (content.IndexOf("<EOF>") > -1)
                 {
+                    Console.WriteLine("<EOF> Found with a buffer of " + state.buffer[0]);
                     //Process data here:
                     if (state.buffer[0] == 1)
                     {
                         //Packet type: Login verification protocol
-                        String firstname = Encoding.ASCII.GetString(state.buffer, 1, 20);
-                        String lastname = Encoding.ASCII.GetString(state.buffer, 21, 20);
-                        String password = Encoding.ASCII.GetString(state.buffer, 41, 20);
-                        Console.WriteLine("Received login protocol: " + firstname + ", " + lastname + ", " + password);
+                        Console.WriteLine("Verifying...");
+                        //String packet = Encoding.ASCII.GetString(state.buffer, 1,  state.buffer.Length-1);
+                        String packet = content;
+                        String[] items = packet.Split('\0');
+                        String firstname = items[0];
+                        String lastname = items[1];
+                        String password = items[2];
 
+                        Console.WriteLine(packet);
+                       // String lastname = Encoding.ASCII.GetString(state.buffer, 22,  Int32.Parse(Encoding.ASCII.GetString(state.buffer, 21, 1)););
+                        //String password = Encoding.ASCII.GetString(state.buffer, 42,  Int32.Parse(Encoding.ASCII.GetString(state.buffer, 41, 1)););
+                        Console.WriteLine("Received login protocol: " + firstname + ", " + lastname + ", " + password);
                         //Check if the credentials correspond to actual 
 
                         //Create verification code
