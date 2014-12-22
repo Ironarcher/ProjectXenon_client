@@ -5,11 +5,9 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
 using System.Runtime.InteropServices;
 using System.Xml;
@@ -48,7 +46,6 @@ namespace Curry_Server
             WriteToUserConsole("Teach-Play Server launched at " + getIP());
             makeDirectories();
             consoleBox.BackColor = System.Drawing.SystemColors.Window;
-            Dictionary<Int32, Byte[]> userList = new Dictionary<Int32, Byte[]>();
         }
 
         [DllImport("kernel32.dll", SetLastError = true)]
@@ -107,6 +104,7 @@ namespace Curry_Server
     public class AsynchronousSocketListener
     {
         // Thread signal.
+        private static Dictionary<Int32, Byte[]> userList = new Dictionary<Int32, Byte[]>();
         public static ManualResetEvent allDone = new ManualResetEvent(false);
 
         public AsynchronousSocketListener()
@@ -190,7 +188,7 @@ namespace Curry_Server
 
                 // Read data from the client socket. 
                 int bytesRead = handler.EndReceive(ar);
-
+                
                 Console.WriteLine("Processing Packet of " + bytesRead + " bytes");
                 if (bytesRead > 0)
                 {
@@ -237,7 +235,14 @@ namespace Curry_Server
                                 loginpacket[2] = Convert.ToByte(random.Next(0, 256));
                                 loginpacket[3] = Convert.ToByte(random.Next(0, 256));
                                 loginpacket[4] = Convert.ToByte(random.Next(0, 256));
+
+                                byte[] userpacket = new byte[3];
+                                userpacket[0] = loginpacket[2];
+                                userpacket[1] = loginpacket[3];
+                                userpacket[2] = loginpacket[4];
                                 //USER FOUND WITH ID 'id'
+                                userList.Add(id, userpacket);
+                                
                             }
 
                         }
@@ -389,6 +394,12 @@ namespace Curry_Server
                 Console.WriteLine(e.ToString());
             }
             return -1;
+        }
+
+        public Dictionary<Int32, byte[]> loggedUsers
+        {
+            get { return userList;}
+            set { userList = value;}
         }
     }
 

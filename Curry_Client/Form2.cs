@@ -34,10 +34,11 @@ namespace Curry_Client
         private static String response = String.Empty;
 
 
-        private byte[] verificationcode = new byte[3];
+        public byte[] verificationcode = new byte[3];
         public loginform()
         {
             InitializeComponent();
+            textAlign();
         }
 
         private Form1 mainForm = null;
@@ -45,6 +46,7 @@ namespace Curry_Client
         {
             mainForm = callingForm as Form1; 
             InitializeComponent();
+            textAlign();
         }
 
         private void textBox3_TextChanged(object sender, EventArgs e)
@@ -52,9 +54,9 @@ namespace Curry_Client
             
         }
 
-        private void verify()
+        public void verify()
         {
-            this.mainForm.logincode = verificationcode;
+            this.mainForm.login = verificationcode;
         }
 
         private byte[] getLoginProtocol()
@@ -110,6 +112,7 @@ namespace Curry_Client
                     {
                         //Wrong name or password entered by user
                         label2.Text = "Name or Password Incorrect.";
+                        textAlign();
                         verificationcode[0] = Convert.ToByte(0);
                         verificationcode[1] = Convert.ToByte(0);
                         verificationcode[2] = Convert.ToByte(0);
@@ -121,6 +124,12 @@ namespace Curry_Client
                         verificationcode[1] = receivedpacket[3];
                         verificationcode[2] = receivedpacket[4];
                         Console.WriteLine("Login Packet Authorization complete");
+                        textAlign();
+
+                        //Transfer to main form
+                        verify();
+                        this.Hide();
+                        mainForm.Show();
                     }
                 } else{
                     Console.WriteLine("A fatal error has occurred: Incorrect packet type returned by server to login verification protocol");
@@ -301,6 +310,7 @@ namespace Curry_Client
         {
             Console.WriteLine("Client Launch");
             label2.Text = "Fill In All Fields.";
+            textAlign();
             //Write dictionary of servers to connect to
             //Pull from master server (list of servers to connect to)
             addServer("Localhost", "127.0.0.1");
@@ -347,11 +357,13 @@ namespace Curry_Client
                 Console.WriteLine(comboBox1.SelectedItem.ToString());
                 Console.WriteLine(masterServerList[comboBox1.SelectedItem.ToString()]);
                 label2.Text = "Logging In.";
+                textAlign();
                 connect(masterServerList[comboBox1.SelectedItem.ToString()]);
             }
             else
             {
                 label2.Text = "A Curriculum Must Be Chosen.";
+                textAlign();
                 comboBox1.BackColor = Color.Red;
             }
         }
@@ -398,10 +410,22 @@ namespace Curry_Client
 
         }
 
-        private void label2_TextChanged(object sender, EventArgs e)
+        private void textAlign()
         {
-            label2.Left = (248 / 2) - (label2.Width / 2);
+            label2.Left = (248-8)/ 2 - (label2.Width / 2);
         }
+
+        /*
+        private void elementAlign()
+        {
+            comboBox1.Left = (this.Width - comboBox1.Width) / 2;
+            firstnamebox.Left = (248-16) / 2- (firstnamebox.Width / 2);
+            lastnamebox.Left = (248-16) / 2 - (lastnamebox.Width / 2);
+            passwordbox.Left = (248-16) / 2 - (passwordbox.Width / 2);
+            Enter.Left = (248-16) / 2 - (Enter.Width / 2);
+            label1.Left = (248-16) / 2 - (label1.Width / 2);
+        }
+         */
     }
 
     // State object for receiving data from remote device.

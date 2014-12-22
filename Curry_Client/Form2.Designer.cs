@@ -41,7 +41,8 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Gadugi", 20.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(69, 9);
+            this.label1.Location = new System.Drawing.Point(72, 9);
+            this.label1.Margin = new System.Windows.Forms.Padding(0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(92, 31);
             this.label1.TabIndex = 0;
@@ -50,7 +51,7 @@
             // firstnamebox
             // 
             this.firstnamebox.ForeColor = System.Drawing.SystemColors.InactiveCaption;
-            this.firstnamebox.Location = new System.Drawing.Point(12, 51);
+            this.firstnamebox.Location = new System.Drawing.Point(15, 51);
             this.firstnamebox.Name = "firstnamebox";
             this.firstnamebox.Size = new System.Drawing.Size(199, 20);
             this.firstnamebox.TabIndex = 1;
@@ -62,7 +63,7 @@
             // lastnamebox
             // 
             this.lastnamebox.ForeColor = System.Drawing.SystemColors.InactiveCaption;
-            this.lastnamebox.Location = new System.Drawing.Point(12, 77);
+            this.lastnamebox.Location = new System.Drawing.Point(15, 77);
             this.lastnamebox.Name = "lastnamebox";
             this.lastnamebox.Size = new System.Drawing.Size(199, 20);
             this.lastnamebox.TabIndex = 2;
@@ -73,7 +74,7 @@
             // passwordbox
             // 
             this.passwordbox.ForeColor = System.Drawing.SystemColors.InactiveCaption;
-            this.passwordbox.Location = new System.Drawing.Point(12, 103);
+            this.passwordbox.Location = new System.Drawing.Point(15, 103);
             this.passwordbox.Name = "passwordbox";
             this.passwordbox.Size = new System.Drawing.Size(199, 20);
             this.passwordbox.TabIndex = 3;
@@ -89,7 +90,7 @@
             this.comboBox1.FormattingEnabled = true;
             this.comboBox1.Items.AddRange(new object[] {
             "Curriculum"});
-            this.comboBox1.Location = new System.Drawing.Point(12, 129);
+            this.comboBox1.Location = new System.Drawing.Point(15, 129);
             this.comboBox1.Name = "comboBox1";
             this.comboBox1.Size = new System.Drawing.Size(199, 21);
             this.comboBox1.TabIndex = 4;
@@ -99,7 +100,7 @@
             // 
             // Enter
             // 
-            this.Enter.Location = new System.Drawing.Point(75, 156);
+            this.Enter.Location = new System.Drawing.Point(79, 156);
             this.Enter.Name = "Enter";
             this.Enter.Size = new System.Drawing.Size(75, 23);
             this.Enter.TabIndex = 5;
@@ -111,13 +112,12 @@
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Gadugi", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(93, 185);
+            this.label2.Location = new System.Drawing.Point(97, 184);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(39, 14);
             this.label2.TabIndex = 6;
             this.label2.Text = "Status";
             this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.label2.TextChanged += new System.EventHandler(this.label2_TextChanged);
             // 
             // loginform
             // 

@@ -18,6 +18,7 @@ namespace Curry_Client
 
     public partial class Form1 : Form
     {
+        private byte[] logincode;
         private const int port = 32320;
         // ManualResetEvent instances signal completion.
         private static ManualResetEvent connectDone =
@@ -33,7 +34,6 @@ namespace Curry_Client
         public Form1()
         {
             InitializeComponent();
-            
         }
 
         /*
@@ -72,7 +72,7 @@ namespace Curry_Client
             AllocConsole();
             Console.WriteLine("Client Launch");
             //connect("127.0.0.1");
-
+            logincode = new byte[3];
         }
 
         [DllImport("kernel32.dll", SetLastError = true)]
@@ -240,12 +240,12 @@ namespace Curry_Client
 
         private void label1_Click(object sender, EventArgs e)
         {
-            loginform lg = new loginform();
+            loginform lg = new loginform(this);
             lg.ShowDialog();
         }
 
 
-        public byte[] logincode
+        public byte[] login
         {
             get { return logincode; }
             set { logincode = value; }
