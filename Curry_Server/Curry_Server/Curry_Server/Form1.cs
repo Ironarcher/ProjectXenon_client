@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading;
 using System.Runtime.InteropServices;
 using System.Xml;
+using System.IO;
 
 namespace Curry_Server
 {
@@ -45,6 +46,7 @@ namespace Curry_Server
             AllocConsole();
             Console.WriteLine("Server Launch");
             WriteToUserConsole("Teach-Play Server launched at " + getIP());
+            makeDirectories();
             consoleBox.BackColor = System.Drawing.SystemColors.Window;
             Dictionary<Int32, Byte[]> userList = new Dictionary<Int32, Byte[]>();
         }
@@ -62,6 +64,30 @@ namespace Curry_Server
         private void consoleBox_TextChanged(object sender, EventArgs e)
         {
 
+        }
+        public static void makeDirectories()
+        {
+            string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            if (!Directory.Exists(appData + "//TeachPlay"))
+            {
+                Directory.CreateDirectory(appData + "//TeachPlay");
+            }
+            if (!Directory.Exists(appData + "//TeachPlay//Server"))
+            {
+                Directory.CreateDirectory(appData + "//TeachPlay//Server");
+            }
+            if (!File.Exists(appData + "//TeachPlay//Server//users.xml"))
+            {
+                makeFile(appData + "//TeachPlay//Server//users.xml");
+            }
+            if (!File.Exists(appData + "//TeachPlay//Server//settings.xml"))
+            {
+                makeFile(appData + "//TeachPlay//Server//settings.xml");
+            }
+        }
+        public static void makeFile(String path)
+        {
+            File.Create(path).Dispose();
         }
     }
 
@@ -200,7 +226,7 @@ namespace Curry_Server
                             int id = findUser(firstname, lastname, password);
                             Console.WriteLine(id);
                             loginpacket[0] = 1;
-                            if (id == 0)
+                            if (id == 0 || id == -1)
                             {
                                 loginpacket[1] = 0;
                             }
@@ -254,7 +280,6 @@ namespace Curry_Server
             handler.BeginSend(byteData, 0, byteData.Length, 0,
                 new AsyncCallback(SendCallback), handler);
         }
-
         private static void SendCallback(IAsyncResult ar)
         {
             try
@@ -278,8 +303,10 @@ namespace Curry_Server
 
         public static int findUser(String firstname, String lastname, String password)
         {
+            
             try
             {
+
                 String xmlfile = "C://Users//Arpad//Desktop//texst.xml";
                 System.Xml.XmlTextReader reader = new System.Xml.XmlTextReader(xmlfile);
                 int tempid = 0;
@@ -364,4 +391,5 @@ namespace Curry_Server
             return -1;
         }
     }
+
 }

@@ -87,19 +87,18 @@ namespace Curry_Client
                 IPEndPoint remoteEP = new IPEndPoint(ipAddress, port);
                 Socket client = new Socket(AddressFamily.InterNetwork,
                     SocketType.Stream, ProtocolType.Tcp);
-                Console.WriteLine("HI");
 
                 //Connect through the remote socket (endpoint)
                 client.BeginConnect(remoteEP,
                     new AsyncCallback(ConnectCallback), client);
-
+                connectDone.WaitOne();
                 // Send test data to the remote device.
                 SendBytes(client, getLoginProtocol());
-                //sendDone.WaitOne();
+                sendDone.WaitOne();
 
                 // Receive the response from the remote device.
                 Receive(client);
-                //receiveDone.WaitOne();
+                receiveDone.WaitOne();
 
                 // Write the response to the console.
                 //Response: First byte (0) is verification that the packet is a type 1 packet
@@ -129,8 +128,8 @@ namespace Curry_Client
                 Console.WriteLine("Verification code: " + Convert.ToInt32(verificationcode[0]) + Convert.ToInt32(verificationcode[1]) + Convert.ToInt32(verificationcode[2]));
 
                 // Release the socket.
-                client.Shutdown(SocketShutdown.Both);
-                client.Close();
+                //client.Shutdown(SocketShutdown.Both);
+                //client.Close();
                 //client.Dispose();
                 //client = null;
 
