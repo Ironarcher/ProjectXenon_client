@@ -292,22 +292,41 @@ namespace Curry_Server
                             userpacket[0] = state.buffer[1];
                             userpacket[1] = state.buffer[2];
                             userpacket[2] = state.buffer[3];
-                            if (userList.ContainsKey(userpacket))
-                            {
+                            Console.WriteLine("UserList size:" + userList.Keys.Count);
+                            Console.WriteLine("Verification code: " + Convert.ToInt32(userpacket[0]) + Convert.ToInt32(userpacket[1]) + Convert.ToInt32(userpacket[2]));
+                            //Console.WriteLine("Verification code: " + Convert.ToInt32(userList.Keys.ToString()));
+                            //int id = 0;
+                            //if (userList.TryGetValue(userpacket, out id))
+                            //{
+                            bool xpflag = false;
+                            Dictionary<byte[], Int32>.KeyCollection keyColl = userList.Keys;
+                            foreach(byte[] cc in keyColl){
+                                if (cc[0] == userpacket[0] && cc[1] == userpacket[1] && cc[2] == userpacket[2])
+                                {
+                                    xpflag = true;
+                                    break;
+                                }
+                                else
+                                {
+                                    xpflag = false;
+                                }
+                            }
+                            if(xpflag){
                                 xppacket[1] = 1; //Indicates success
                                 xppacket[2] = userpacket[0];
                                 xppacket[3] = userpacket[1];
                                 xppacket[4] = userpacket[2];
-                                int id = userList[userpacket];
                                 int xp = 200;
                                 //retrieve xp from xml!
-                                byte[] temp = Encoding.ASCII.GetBytes(xp.ToString());
-                                temp.CopyTo(xppacket, 5);
                                 byte[] fnl = Encoding.ASCII.GetBytes("\0");
-                                fnl.CopyTo(xppacket, 5 + Encoding.ASCII.GetByteCount(xp.ToString()));
+                                fnl.CopyTo(xppacket, 5);
+                                byte[] temp = Encoding.ASCII.GetBytes(xp.ToString());
+                                temp.CopyTo(xppacket, 6);
+                                fnl.CopyTo(xppacket, 6 + Encoding.ASCII.GetByteCount(xp.ToString()));
                             }
                             else
                             {
+                                Console.WriteLine("Failure");
                                 xppacket[1] = 0; //Indicates failure
                                 xppacket[2] = 0;
                                 xppacket[3] = 0;
@@ -399,7 +418,7 @@ namespace Curry_Server
                         {
                             if (tempstring == "firstname")
                             {
-                                if (firstname.CompareTo(reader.Value) == 1)
+                                if (firstname.CompareTo(reader.Value) == 0)
                                 {
                                     flag = true;
                                 } else{
@@ -413,7 +432,7 @@ namespace Curry_Server
                             }
                             else if (tempstring == "lastname")
                             {
-                                if (lastname.CompareTo(reader.Value) == 1)
+                                if (lastname.CompareTo(reader.Value) == 0)
                                 {
                                     flag1 = true;
                                 }
@@ -427,7 +446,7 @@ namespace Curry_Server
                             }
                             else if (tempstring == "password")
                             {
-                                if (password.CompareTo(reader.Value) == 1)
+                                if (password.CompareTo(reader.Value) == 0)
                                 {
                                     flag2 = true;
                                 }

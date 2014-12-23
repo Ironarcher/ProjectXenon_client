@@ -78,6 +78,7 @@ namespace Curry_Client
             //connect("127.0.0.1");
             prevtab = tabControl1.SelectedTab;
             logincode = new byte[3];
+            ServerIP = "127.0.0.1";
         }
 
         [DllImport("kernel32.dll", SetLastError = true)]
@@ -93,8 +94,9 @@ namespace Curry_Client
             packet[1] = logincode[0];
             packet[2] = logincode[1];
             packet[3] = logincode[2];
+            Console.WriteLine("Verification code: " + Convert.ToInt32(logincode[0]) + Convert.ToInt32(logincode[1]) + Convert.ToInt32(logincode[2]));
             byte[] temp = Encoding.ASCII.GetBytes("<EOF>");
-            packet.CopyTo(temp, 4);
+            temp.CopyTo(packet, 4);
             connect(ServerIP, packet);
         }
 
@@ -204,16 +206,15 @@ namespace Curry_Client
                     {
                         response = state.sb.ToString();
                         receivedpacket = state.buffer;
+                        Console.WriteLine("Response: " + response);
                         if (receivedpacket[0] == 2)
                         {
                             //Experience Point transmission protocol
                             if (receivedpacket[1] == 1 && receivedpacket[2] == logincode[0] && receivedpacket[3] == logincode[1] && receivedpacket[4] == logincode[2])
                             {
                                 //Verified the server and the server accepted the packet
-                                int len = response.Length;
-                                String s = response.Substring(6, len - 6);
-                                String[] items = s.Split('\0');
-                                int finalxp = Convert.ToInt32(items[0]);
+                                String[] items = response.Split('\0');
+                                int finalxp = Convert.ToInt32(items[1]);
                                 Console.WriteLine("XP Received: " + finalxp);
                             }
                         }
@@ -333,6 +334,7 @@ namespace Curry_Client
             {
                 tabControl1.SelectedTab = prevtab;
                 FormSuperUser lg = new FormSuperUser();
+                lg.ShowDialog();
             }
         }
 
@@ -345,9 +347,9 @@ namespace Curry_Client
                     prevtab = tabControl1.SelectedTab;
                 }
             }
-            catch
+            catch(Exception g)
             {
-
+                Console.WriteLine(g.ToString());
             }
         }
         private void enableSuperUser()

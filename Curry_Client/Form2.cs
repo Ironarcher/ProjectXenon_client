@@ -57,7 +57,7 @@ namespace Curry_Client
         public void verify()
         {
             this.mainForm.login = verificationcode;
-            this.mainForm.serverIP = masterServerList[comboBox1.SelectedItem.ToString()];
+            //this.mainForm.serverIP = masterServerList[comboBox1.SelectedItem.ToString()];
         }
 
         private byte[] getLoginProtocol()
@@ -125,7 +125,7 @@ namespace Curry_Client
                         verificationcode[1] = receivedpacket[3];
                         verificationcode[2] = receivedpacket[4];
                         Console.WriteLine("Login Packet Authorization complete");
-                        textAlign();
+                        //textAlign();
 
                         //Transfer to main form
                         verify();
@@ -415,6 +415,11 @@ namespace Curry_Client
         private void textAlign()
         {
             label2.Left = (248-8)/ 2 - (label2.Width / 2);
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
         }
 
         /*

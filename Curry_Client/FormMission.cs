@@ -222,6 +222,10 @@ namespace Curry_Client
                 listBox1.Items.Remove(listBox1.SelectedItem);
             }
             numericUpDown2.Maximum = listBox1.Items.Count;
+            if (numericUpDown2.Maximum == 0)
+            {
+                numericUpDown2.Maximum = 1;
+            }
         }
         private void buttonAdd_Click(object sender, EventArgs e)
         {
@@ -270,6 +274,10 @@ namespace Curry_Client
                 }
             }
             numericUpDown2.Maximum = listBox1.Items.Count;
+            if (numericUpDown2.Maximum == 0)
+            {
+                numericUpDown2.Maximum = 1;
+            }
         }
 
         private void buttonFinish_Click(object sender, EventArgs e)
