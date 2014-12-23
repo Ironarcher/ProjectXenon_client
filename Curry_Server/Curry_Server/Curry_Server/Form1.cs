@@ -630,6 +630,26 @@ namespace Curry_Server
                 }
             }
         }
+        public int getID(String firstname, String lastname)
+        {
+            XmlDocument doc = new XmlDocument();
+            doc.Load(userXML);
+            XmlNodeList elemList = doc.GetElementsByTagName("user");
+            for (int i = 0; i < elemList.Count; i++)
+            {
+                XmlNode x = elemList.Item(i);
+                if (x.NodeType == XmlNodeType.Element)
+                {
+                    XmlElement e = (XmlElement)x;
+                    int tid = Int32.Parse(e.GetAttribute("id"));
+                    if (e.ChildNodes.Item(0).FirstChild.Value == firstname && e.ChildNodes.Item(1).FirstChild.Value == lastname)
+                    {
+                        return tid;
+                    }
+                }
+            }
+            return 0;
+        }
     }
 
 }
