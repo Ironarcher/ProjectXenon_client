@@ -45,6 +45,7 @@ namespace Curry_Server
             Console.WriteLine("Server Launch");
             WriteToUserConsole("Teach-Play Server launched at " + getIP());
             makeDirectories();
+            //User.createUser("Joseph", "Stafford", "password", true);
             consoleBox.BackColor = System.Drawing.SystemColors.Window;
         }
 
@@ -73,13 +74,18 @@ namespace Curry_Server
             {
                 Directory.CreateDirectory(appData + "//TeachPlay//Server");
             }
-            if (!File.Exists(appData + "//TeachPlay//Server//users.xml"))
+            if (!File.Exists(User.userXML))
             {
-                makeFile(appData + "//TeachPlay//Server//users.xml");
-            }
-            if (!File.Exists(appData + "//TeachPlay//Server//settings.xml"))
-            {
-                makeFile(appData + "//TeachPlay//Server//settings.xml");
+                //makeFile(User.userXML);
+                XmlDocument doc = new XmlDocument();
+                //doc.Load(User.userXML);
+                XmlDeclaration xmldecl;
+                xmldecl = doc.CreateXmlDeclaration("1.0", "UTF-8", null);
+                XmlElement root = doc.DocumentElement;
+                doc.InsertBefore(xmldecl, root);
+                XmlElement lchild = doc.CreateElement("library");
+                doc.AppendChild(lchild);
+                doc.Save(User.userXML);
             }
         }
         public static void makeFile(String path)
@@ -312,7 +318,7 @@ namespace Curry_Server
             try
             {
 
-                String xmlfile = "C://Users//Arpad//Desktop//texst.xml";
+                String xmlfile = User.userXML;
                 System.Xml.XmlTextReader reader = new System.Xml.XmlTextReader(xmlfile);
                 int tempid = 0;
                 bool flag = false;
@@ -331,7 +337,7 @@ namespace Curry_Server
                         {
                             if (tempstring == "firstname")
                             {
-                                flag = firstname.CompareTo(reader.Value) == 0;
+                                flag = firstname.Equals(reader.Value);
                                 //Console.WriteLine(i);
                                 Console.WriteLine("'" + firstname + "'");
                                 Console.WriteLine(reader.Value);
@@ -340,14 +346,14 @@ namespace Curry_Server
                             }
                             else if (tempstring == "lastname")
                             {
-                                flag1 = lastname.CompareTo(reader.Value) == 0;
+                                flag1 = firstname.Equals(reader.Value);
                                 Console.WriteLine(lastname);
                                 Console.WriteLine(reader.Value);
                                 Console.WriteLine(flag1);
                             }
                             else if (tempstring == "password")
                             {
-                                flag2 = password.CompareTo(reader.Value) == 0;
+                                flag2 = firstname.Equals(reader.Value);
                                 Console.WriteLine(password);
                                 Console.WriteLine(reader.Value);
                                 Console.WriteLine(flag2);
@@ -400,6 +406,224 @@ namespace Curry_Server
         {
             get { return userList;}
             set { userList = value;}
+        }
+    }
+    public class User {
+        /*
+         * getFirstName(id) returns the first name of user with id "id"
+         * getLastName, getPassword, getSuperUser are the same
+         * getInfo(id) returns a string array where [0] is firstname, [1] is lastname, [2] is password
+         * setFirstName(id, name) sets the first name of user with id "id" to "name"
+         * setLastName, setPassword, setSuperUser are the same
+         * Example: User.setLastName(1, "Kovesdy"); sets user id 1's last name to Kovesdy
+         * 
+         * createUser(firstname, lastname, password, superuser)
+         * creates a user with newest available id with the given info
+         */
+        public static String userXML = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "//TeachPlay//Server//users.xml";
+        public static String getFirstName(int id)
+        {
+            XmlDocument doc = new XmlDocument();
+            doc.Load(userXML);
+            XmlNodeList elemList = doc.GetElementsByTagName("user");
+            for (int i = 0; i < elemList.Count; i++)
+            {
+                XmlNode x = elemList.Item(i);
+                if (x.NodeType == XmlNodeType.Element)
+                {
+                    XmlElement e = (XmlElement)x;
+                    int tid = Int32.Parse(e.GetAttribute("id"));
+                    if (id == tid)
+                    {
+                        return e.ChildNodes.Item(0).FirstChild.Value;
+                    }
+                }
+            }
+            return "";
+        }
+        public static String getLastName(int id)
+        {
+            XmlDocument doc = new XmlDocument();
+            doc.Load(userXML);
+            XmlNodeList elemList = doc.GetElementsByTagName("user");
+            for (int i = 0; i < elemList.Count; i++)
+            {
+                XmlNode x = elemList.Item(i);
+                if (x.NodeType == XmlNodeType.Element)
+                {
+                    XmlElement e = (XmlElement)x;
+                    int tid = Int32.Parse(e.GetAttribute("id"));
+                    if (id == tid)
+                    {
+                        return e.ChildNodes.Item(1).FirstChild.Value;
+                    }
+                }
+            }
+            return "";
+        }
+        public static String getPassword(int id)
+        {
+            XmlDocument doc = new XmlDocument();
+            doc.Load(userXML);
+            XmlNodeList elemList = doc.GetElementsByTagName("user");
+            for (int i = 0; i < elemList.Count; i++)
+            {
+                XmlNode x = elemList.Item(i);
+                if (x.NodeType == XmlNodeType.Element)
+                {
+                    XmlElement e = (XmlElement)x;
+                    int tid = Int32.Parse(e.GetAttribute("id"));
+                    if (id == tid)
+                    {
+                        return e.ChildNodes.Item(2).FirstChild.Value;
+                    }
+                }
+            }
+            return "";
+        }
+        public static int createUser(String firstname, String lastname, String password, bool superuser)
+        {
+            XmlDocument doc = new XmlDocument();
+            doc.Load(userXML);
+            XmlNodeList elemList = doc.GetElementsByTagName("user");
+            int newid = elemList.Count+1;           
+            XmlElement e = doc.CreateElement("user");
+            XmlAttribute a = doc.CreateAttribute("id");
+            a.Value = newid.ToString();
+            e.Attributes.Append(a);
+            XmlElement fchild = doc.CreateElement("firstname");
+            fchild.AppendChild(doc.CreateTextNode(firstname));
+            XmlElement lchild = doc.CreateElement("lastname");
+            lchild.AppendChild(doc.CreateTextNode(lastname));
+            XmlElement pchild = doc.CreateElement("password");
+            pchild.AppendChild(doc.CreateTextNode(password));
+            XmlElement schild = doc.CreateElement("superuser");
+            schild.AppendChild(doc.CreateTextNode(superuser.ToString()));
+            e.AppendChild(fchild);
+            e.AppendChild(lchild);
+            e.AppendChild(pchild);
+            e.AppendChild(schild);
+            doc.ChildNodes.Item(1).AppendChild(e);
+            doc.Save(userXML);
+            //doc.FirstChild.AppendChild
+            return newid;
+        }
+        public static String[] getInfo(int id) //[0] is fisrtname, [1] is lastname, [2] is password
+        {
+            XmlDocument doc = new XmlDocument();
+            doc.Load(userXML);
+            XmlNodeList elemList = doc.GetElementsByTagName("user");
+            for (int i = 0; i < elemList.Count; i++)
+            {
+                XmlNode x = elemList.Item(i);
+                if (x.NodeType == XmlNodeType.Element)
+                {
+                    XmlElement e = (XmlElement)x;
+                    int tid = Int32.Parse(e.GetAttribute("id"));
+                    if (id == tid)
+                    {
+                        return new String[] {e.ChildNodes.Item(0).FirstChild.Value, e.ChildNodes.Item(1).FirstChild.Value, e.ChildNodes.Item(2).FirstChild.Value};
+                    }
+                }
+            }
+            return null;
+        }
+        public bool getSuperUser(int id)
+        {
+            XmlDocument doc = new XmlDocument();
+            doc.Load(userXML);
+            XmlNodeList elemList = doc.GetElementsByTagName("user");
+            for (int i = 0; i < elemList.Count; i++)
+            {
+                XmlNode x = elemList.Item(i);
+                if (x.NodeType == XmlNodeType.Element)
+                {
+                    XmlElement e = (XmlElement)x;
+                    int tid = Int32.Parse(e.GetAttribute("id"));
+                    if (id == tid)
+                    {
+                        return e.ChildNodes.Item(3).FirstChild.Value == "True";
+                    }
+                }
+            }
+            return false;
+        }
+
+        public void setFirstName(int id, String value)
+        {
+            XmlDocument doc = new XmlDocument();
+            doc.Load(userXML);
+            XmlNodeList elemList = doc.GetElementsByTagName("user");
+            for (int i = 0; i < elemList.Count; i++)
+            {
+                XmlNode x = elemList.Item(i);
+                if (x.NodeType == XmlNodeType.Element)
+                {
+                    XmlElement e = (XmlElement)x;
+                    int tid = Int32.Parse(e.GetAttribute("id"));
+                    if (id == tid)
+                    {
+                        e.ChildNodes.Item(0).FirstChild.Value = value;
+                    }
+                }
+            }
+        }
+        public void setLastName(int id, String value)
+        {
+            XmlDocument doc = new XmlDocument();
+            doc.Load(userXML);
+            XmlNodeList elemList = doc.GetElementsByTagName("user");
+            for (int i = 0; i < elemList.Count; i++)
+            {
+                XmlNode x = elemList.Item(i);
+                if (x.NodeType == XmlNodeType.Element)
+                {
+                    XmlElement e = (XmlElement)x;
+                    int tid = Int32.Parse(e.GetAttribute("id"));
+                    if (id == tid)
+                    {
+                        e.ChildNodes.Item(1).FirstChild.Value = value;
+                    }
+                }
+            }
+        }
+        public void setPassword(int id, String value)
+        {
+            XmlDocument doc = new XmlDocument();
+            doc.Load(userXML);
+            XmlNodeList elemList = doc.GetElementsByTagName("user");
+            for (int i = 0; i < elemList.Count; i++)
+            {
+                XmlNode x = elemList.Item(i);
+                if (x.NodeType == XmlNodeType.Element)
+                {
+                    XmlElement e = (XmlElement)x;
+                    int tid = Int32.Parse(e.GetAttribute("id"));
+                    if (id == tid)
+                    {
+                        e.ChildNodes.Item(2).FirstChild.Value = value;
+                    }
+                }
+            }
+        }
+        public void setSuperUser(int id, bool value)
+        {
+            XmlDocument doc = new XmlDocument();
+            doc.Load(userXML);
+            XmlNodeList elemList = doc.GetElementsByTagName("user");
+            for (int i = 0; i < elemList.Count; i++)
+            {
+                XmlNode x = elemList.Item(i);
+                if (x.NodeType == XmlNodeType.Element)
+                {
+                    XmlElement e = (XmlElement)x;
+                    int tid = Int32.Parse(e.GetAttribute("id"));
+                    if (id == tid)
+                    {
+                        e.ChildNodes.Item(3).FirstChild.Value = value.ToString();
+                    }
+                }
+            }
         }
     }
 
