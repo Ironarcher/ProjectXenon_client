@@ -57,6 +57,7 @@ namespace Curry_Client
         public void verify()
         {
             this.mainForm.login = verificationcode;
+            this.mainForm.serverIP = masterServerList[comboBox1.SelectedItem.ToString()];
         }
 
         private byte[] getLoginProtocol()

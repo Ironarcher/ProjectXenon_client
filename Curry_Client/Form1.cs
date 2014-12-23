@@ -18,7 +18,10 @@ namespace Curry_Client
 
     public partial class Form1 : Form
     {
-        private byte[] logincode;
+        private String ServerIP;
+        private static byte[] receivedpacket;
+        private static byte[] logincode;
+        private int currentXP;
         private bool super = false;
         private const int port = 32320;
         // ManualResetEvent instances signal completion.
@@ -81,8 +84,22 @@ namespace Curry_Client
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool AllocConsole();
 
+        private void requestXP()
+        {
+            byte[] packet = new byte[9];
+            //packet type 2 is an XP request/transmission protocol
+            //packet bytes 1-3 are authorization bytes
+            packet[0] = 2;
+            packet[1] = logincode[0];
+            packet[2] = logincode[1];
+            packet[3] = logincode[2];
+            byte[] temp = Encoding.ASCII.GetBytes("<EOF>");
+            packet.CopyTo(temp, 4);
+            connect(ServerIP, packet);
+        }
+
         //IP_AD is the IP address of the server
-        private static void connect(string IP_AD)
+        private static void connect(string IP_AD, byte[] data)
         {
             try
             {
@@ -97,7 +114,7 @@ namespace Curry_Client
                     new AsyncCallback(ConnectCallback), client);
 
                 // Send test data to the remote device.
-                Send(client, "This is a test<EOF>");
+                SendBytes(client, data);
                 sendDone.WaitOne();
 
                 // Receive the response from the remote device.
@@ -186,6 +203,20 @@ namespace Curry_Client
                     if (state.sb.Length > 1)
                     {
                         response = state.sb.ToString();
+                        receivedpacket = state.buffer;
+                        if (receivedpacket[0] == 2)
+                        {
+                            //Experience Point transmission protocol
+                            if (receivedpacket[1] == 1 && receivedpacket[2] == logincode[0] && receivedpacket[3] == logincode[1] && receivedpacket[4] == logincode[2])
+                            {
+                                //Verified the server and the server accepted the packet
+                                int len = response.Length;
+                                String s = response.Substring(6, len - 6);
+                                String[] items = s.Split('\0');
+                                int finalxp = Convert.ToInt32(items[0]);
+                                Console.WriteLine("XP Received: " + finalxp);
+                            }
+                        }
                     }
                     // Signal that all bytes have been received.
                     receiveDone.Set();
@@ -201,6 +232,14 @@ namespace Curry_Client
         {
             // Convert the string data to byte data using ASCII encoding.
             byte[] byteData = Encoding.ASCII.GetBytes(data);
+
+            // Begin sending the data to the remote device.
+            client.BeginSend(byteData, 0, byteData.Length, 0,
+                new AsyncCallback(SendCallback), client);
+        }
+
+        private static void SendBytes(Socket client, byte[] byteData)
+        {
 
             // Begin sending the data to the remote device.
             client.BeginSend(byteData, 0, byteData.Length, 0,
@@ -253,9 +292,15 @@ namespace Curry_Client
             set { logincode = value; }
         }
 
+        public String serverIP
+        {
+            get { return ServerIP; }
+            set { serverIP = value; }
+        }
+
         private void button1_Click_1(object sender, EventArgs e)
         {
-            connect("108.248.159.5");
+            //connect("108.248.159.5");
         }
 
         private void label1_MouseHover(object sender, EventArgs e)
@@ -288,7 +333,6 @@ namespace Curry_Client
             {
                 tabControl1.SelectedTab = prevtab;
                 FormSuperUser lg = new FormSuperUser();
-                lg.ShowDialog();
             }
         }
 
@@ -337,6 +381,11 @@ namespace Curry_Client
         private void button2_Click(object sender, EventArgs e)
         {
             disableSuperUser();
+        }
+
+        private void button_xp_Click(object sender, EventArgs e)
+        {
+            requestXP();
         }
     }
 }
