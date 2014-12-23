@@ -76,9 +76,11 @@
             this.label7 = new System.Windows.Forms.Label();
             this.button1 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
+            this.button_xp = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.mission_page.SuspendLayout();
             this.groupBox5.SuspendLayout();
+            this.missionPanel.SuspendLayout();
             this.groupBox4.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.inv_page.SuspendLayout();
@@ -150,6 +152,7 @@
             // missionPanel
             // 
             this.missionPanel.BackColor = System.Drawing.Color.Transparent;
+            this.missionPanel.Controls.Add(this.button_xp);
             this.missionPanel.Location = new System.Drawing.Point(6, 19);
             this.missionPanel.Name = "missionPanel";
             this.missionPanel.Size = new System.Drawing.Size(504, 295);
@@ -656,6 +659,16 @@
             this.button2.UseVisualStyleBackColor = true;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
+            // button_xp
+            // 
+            this.button_xp.Location = new System.Drawing.Point(64, 50);
+            this.button_xp.Name = "button_xp";
+            this.button_xp.Size = new System.Drawing.Size(75, 23);
+            this.button_xp.TabIndex = 0;
+            this.button_xp.Text = "getxp";
+            this.button_xp.UseVisualStyleBackColor = true;
+            this.button_xp.Click += new System.EventHandler(this.button_xp_Click);
+            // 
             // Form1
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
@@ -677,6 +690,7 @@
             this.tabControl1.ResumeLayout(false);
             this.mission_page.ResumeLayout(false);
             this.groupBox5.ResumeLayout(false);
+            this.missionPanel.ResumeLayout(false);
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
             this.groupBox3.ResumeLayout(false);
@@ -747,6 +761,7 @@
         private System.Windows.Forms.Button item_use;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button button_xp;
 
 
 

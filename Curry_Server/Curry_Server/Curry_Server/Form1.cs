@@ -140,7 +140,7 @@ namespace Curry_Server
     public class AsynchronousSocketListener
     {
         // Thread signal.
-        private static Dictionary<Int32, Byte[]> userList = new Dictionary<Int32, Byte[]>();
+        private static Dictionary<Byte[], Int32> userList = new Dictionary<Byte[], Int32>();
         public static ManualResetEvent allDone = new ManualResetEvent(false);
 
         public AsynchronousSocketListener()
@@ -277,10 +277,43 @@ namespace Curry_Server
                                 userpacket[1] = loginpacket[3];
                                 userpacket[2] = loginpacket[4];
                                 //USER FOUND WITH ID 'id'
-                                userList.Add(id, userpacket);
+                                userList.Add(userpacket, id);
                                 
                             }
+                            SendBytes(handler, loginpacket);
 
+                        }
+                        else if (state.buffer[0] == 2)
+                        {
+                            //Received XP protocol
+                            byte[] userpacket = new byte[3];
+                            byte[] xppacket = new byte[15];
+                            xppacket[0] = 2;
+                            userpacket[0] = state.buffer[1];
+                            userpacket[1] = state.buffer[2];
+                            userpacket[2] = state.buffer[3];
+                            if (userList.ContainsKey(userpacket))
+                            {
+                                xppacket[1] = 1; //Indicates success
+                                xppacket[2] = userpacket[0];
+                                xppacket[3] = userpacket[1];
+                                xppacket[4] = userpacket[2];
+                                int id = userList[userpacket];
+                                int xp = 200;
+                                //retrieve xp from xml!
+                                byte[] temp = Encoding.ASCII.GetBytes(xp.ToString());
+                                temp.CopyTo(xppacket, 5);
+                                byte[] fnl = Encoding.ASCII.GetBytes("\0");
+                                fnl.CopyTo(xppacket, 5 + Encoding.ASCII.GetByteCount(xp.ToString()));
+                            }
+                            else
+                            {
+                                xppacket[1] = 0; //Indicates failure
+                                xppacket[2] = 0;
+                                xppacket[3] = 0;
+                                xppacket[4] = 0;
+                            }
+                            SendBytes(handler, xppacket);
                         }
 
 
@@ -289,7 +322,6 @@ namespace Curry_Server
                         Console.WriteLine("Read {0} bytes from socket. \n Data : {1}",
                             content.Length, content);
                         // Echo the data back to the client.
-                        SendBytes(handler, loginpacket);
                     }
                     else
                     {
@@ -367,7 +399,12 @@ namespace Curry_Server
                         {
                             if (tempstring == "firstname")
                             {
-                                flag = firstname.Equals(reader.Value);
+                                if (firstname.CompareTo(reader.Value) == 1)
+                                {
+                                    flag = true;
+                                } else{
+                                    flag = false;
+                                }
                                 //Console.WriteLine(i);
                                 Console.WriteLine("'" + firstname + "'");
                                 Console.WriteLine(reader.Value);
@@ -376,14 +413,28 @@ namespace Curry_Server
                             }
                             else if (tempstring == "lastname")
                             {
-                                flag1 = firstname.Equals(reader.Value);
+                                if (lastname.CompareTo(reader.Value) == 1)
+                                {
+                                    flag1 = true;
+                                }
+                                else
+                                {
+                                    flag1 = false;
+                                }
                                 Console.WriteLine(lastname);
                                 Console.WriteLine(reader.Value);
                                 Console.WriteLine(flag1);
                             }
                             else if (tempstring == "password")
                             {
-                                flag2 = firstname.Equals(reader.Value);
+                                if (password.CompareTo(reader.Value) == 1)
+                                {
+                                    flag2 = true;
+                                }
+                                else
+                                {
+                                    flag2 = false;
+                                }
                                 Console.WriteLine(password);
                                 Console.WriteLine(reader.Value);
                                 Console.WriteLine(flag2);
@@ -432,7 +483,7 @@ namespace Curry_Server
             return -1;
         }
 
-        public Dictionary<Int32, byte[]> loggedUsers
+        public Dictionary<byte[], Int32> loggedUsers
         {
             get { return userList;}
             set { userList = value;}
