@@ -45,7 +45,7 @@ namespace Curry_Server
             Console.WriteLine("Server Launch");
             WriteToUserConsole("Teach-Play Server launched at " + getIP());
             makeDirectories();
-            //User.createUser("Joseph", "Stafford", "password", true);
+            //User.createUser("Joseph", "Stafford", "password", false);
             consoleBox.BackColor = System.Drawing.SystemColors.Window;
         }
 
@@ -95,7 +95,32 @@ namespace Curry_Server
 
         private void promote_button_Click(object sender, EventArgs e)
         {
+            int promoteduserid = User.getID(first_promote.Text, last_promote.Text);
+            Console.WriteLine(promoteduserid);
+            if (!User.getSuperUser(promoteduserid))
+            {
+                User.setSuperUser(promoteduserid, true);
+                Console.WriteLine(promoteduserid + " User (id) made a superuser");
+            }
+            else
+            {
+                MessageBox.Show("Already a superuser");
+                Console.WriteLine("Already a superuser");
+            }
+        }
 
+        private void demote_button_Click(object sender, EventArgs e)
+        {
+            int demoteduserid = User.getID(first_demote.Text, last_demote.Text);
+            if (User.getSuperUser(demoteduserid))
+            {
+                User.setSuperUser(demoteduserid, false);
+            }
+            else
+            {
+                MessageBox.Show("Not a superuser to begin with");
+                Console.WriteLine("Not a superuser to begin with");
+            }
         }
     }
 
@@ -533,7 +558,7 @@ namespace Curry_Server
             }
             return null;
         }
-        public bool getSuperUser(int id)
+        public static bool getSuperUser(int id)
         {
             XmlDocument doc = new XmlDocument();
             doc.Load(userXML);
@@ -554,7 +579,7 @@ namespace Curry_Server
             return false;
         }
 
-        public void setFirstName(int id, String value)
+        public static void setFirstName(int id, String value)
         {
             XmlDocument doc = new XmlDocument();
             doc.Load(userXML);
@@ -573,7 +598,7 @@ namespace Curry_Server
                 }
             }
         }
-        public void setLastName(int id, String value)
+        public static void setLastName(int id, String value)
         {
             XmlDocument doc = new XmlDocument();
             doc.Load(userXML);
@@ -592,7 +617,7 @@ namespace Curry_Server
                 }
             }
         }
-        public void setPassword(int id, String value)
+        public static void setPassword(int id, String value)
         {
             XmlDocument doc = new XmlDocument();
             doc.Load(userXML);
@@ -611,7 +636,7 @@ namespace Curry_Server
                 }
             }
         }
-        public void setSuperUser(int id, bool value)
+        public static void setSuperUser(int id, bool value)
         {
             XmlDocument doc = new XmlDocument();
             doc.Load(userXML);
@@ -630,7 +655,7 @@ namespace Curry_Server
                 }
             }
         }
-        public int getID(String firstname, String lastname)
+        public static int getID(String firstname, String lastname)
         {
             XmlDocument doc = new XmlDocument();
             doc.Load(userXML);

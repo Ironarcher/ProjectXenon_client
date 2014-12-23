@@ -154,6 +154,7 @@
             this.demote_button.TabIndex = 13;
             this.demote_button.Text = "Demote";
             this.demote_button.UseVisualStyleBackColor = true;
+            this.demote_button.Click += new System.EventHandler(this.demote_button_Click);
             // 
             // Form1
             // 
