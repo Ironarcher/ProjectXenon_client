@@ -44,6 +44,7 @@
             this.collab_page = new System.Windows.Forms.TabPage();
             this.inv_page = new System.Windows.Forms.TabPage();
             this.groupBox6 = new System.Windows.Forms.GroupBox();
+            this.item_use = new System.Windows.Forms.Button();
             this.item_description = new System.Windows.Forms.Label();
             this.item_type = new System.Windows.Forms.Label();
             this.item_name = new System.Windows.Forms.Label();
@@ -73,7 +74,6 @@
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.oldMissionList = new System.Windows.Forms.ListBox();
             this.label7 = new System.Windows.Forms.Label();
-            this.item_use = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.mission_page.SuspendLayout();
             this.groupBox5.SuspendLayout();
@@ -287,6 +287,15 @@
             this.groupBox6.TabIndex = 9;
             this.groupBox6.TabStop = false;
             this.groupBox6.Text = "Item Description";
+            // 
+            // item_use
+            // 
+            this.item_use.Location = new System.Drawing.Point(39, 96);
+            this.item_use.Name = "item_use";
+            this.item_use.Size = new System.Drawing.Size(75, 23);
+            this.item_use.TabIndex = 3;
+            this.item_use.Text = "Equip/Use";
+            this.item_use.UseVisualStyleBackColor = true;
             // 
             // item_description
             // 
@@ -622,15 +631,6 @@
             this.label7.Size = new System.Drawing.Size(72, 22);
             this.label7.TabIndex = 12;
             this.label7.Text = "contact";
-            // 
-            // item_use
-            // 
-            this.item_use.Location = new System.Drawing.Point(39, 96);
-            this.item_use.Name = "item_use";
-            this.item_use.Size = new System.Drawing.Size(75, 23);
-            this.item_use.TabIndex = 3;
-            this.item_use.Text = "Equip/Use";
-            this.item_use.UseVisualStyleBackColor = true;
             // 
             // Form1
             // 

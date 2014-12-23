@@ -61,7 +61,7 @@ namespace Curry_Server
 
         private void consoleBox_TextChanged(object sender, EventArgs e)
         {
-
+            
         }
         public static void makeDirectories()
         {
@@ -91,6 +91,11 @@ namespace Curry_Server
         public static void makeFile(String path)
         {
             File.Create(path).Dispose();
+        }
+
+        private void promote_button_Click(object sender, EventArgs e)
+        {
+
         }
     }
 
