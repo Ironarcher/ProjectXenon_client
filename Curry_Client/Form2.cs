@@ -129,6 +129,7 @@ namespace Curry_Client
                         //Transfer to main form
                         verify();
                         this.Hide();
+                        
                         mainForm.Show();
                     }
                 } else{
@@ -322,12 +323,12 @@ namespace Curry_Client
             */
 
 
-            if (!comboBox1.Items.Contains("Curriculum"))
+            if (!comboBox1.Items.Contains("Select Curriculum"))
             {
-                comboBox1.Items.Add("Curriculum");
+                comboBox1.Items.Add("Select Curriculum");
             }
 
-            comboBox1.Text = "Curriculum";
+            comboBox1.Text = "Select Curriculum";
         }
 
         private void firstnamebox_TextChanged(object sender, EventArgs e)

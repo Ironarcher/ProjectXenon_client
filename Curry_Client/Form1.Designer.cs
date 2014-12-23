@@ -49,12 +49,12 @@
             this.item_type = new System.Windows.Forms.Label();
             this.item_name = new System.Windows.Forms.Label();
             this.inv_level = new System.Windows.Forms.Label();
-            this.level_plaque = new System.Windows.Forms.PictureBox();
             this.exp_label = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.progressBar2 = new System.Windows.Forms.ProgressBar();
-            this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.level_plaque = new System.Windows.Forms.PictureBox();
+            this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.badge_page = new System.Windows.Forms.TabPage();
             this.leaderboard_page = new System.Windows.Forms.TabPage();
             this.setting_page = new System.Windows.Forms.TabPage();
@@ -74,6 +74,8 @@
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.oldMissionList = new System.Windows.Forms.ListBox();
             this.label7 = new System.Windows.Forms.Label();
+            this.button1 = new System.Windows.Forms.Button();
+            this.button2 = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.mission_page.SuspendLayout();
             this.groupBox5.SuspendLayout();
@@ -118,6 +120,8 @@
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(536, 570);
             this.tabControl1.TabIndex = 6;
+            this.tabControl1.SelectedIndexChanged += new System.EventHandler(this.tabControl1_SelectedIndexChanged);
+            this.tabControl1.Selecting += new System.Windows.Forms.TabControlCancelEventHandler(this.tabControl1_Selecting);
             // 
             // mission_page
             // 
@@ -261,12 +265,12 @@
             // 
             this.inv_page.Controls.Add(this.groupBox6);
             this.inv_page.Controls.Add(this.inv_level);
-            this.inv_page.Controls.Add(this.level_plaque);
             this.inv_page.Controls.Add(this.exp_label);
             this.inv_page.Controls.Add(this.label3);
             this.inv_page.Controls.Add(this.progressBar2);
-            this.inv_page.Controls.Add(this.pictureBox2);
             this.inv_page.Controls.Add(this.tableLayoutPanel1);
+            this.inv_page.Controls.Add(this.level_plaque);
+            this.inv_page.Controls.Add(this.pictureBox2);
             this.inv_page.Location = new System.Drawing.Point(4, 22);
             this.inv_page.Name = "inv_page";
             this.inv_page.Size = new System.Drawing.Size(528, 544);
@@ -338,15 +342,6 @@
             this.inv_level.TabIndex = 8;
             this.inv_level.Text = "Level: 1";
             // 
-            // level_plaque
-            // 
-            this.level_plaque.Image = global::Curry_Client.Properties.Resources.plaque1;
-            this.level_plaque.Location = new System.Drawing.Point(280, 19);
-            this.level_plaque.Name = "level_plaque";
-            this.level_plaque.Size = new System.Drawing.Size(70, 90);
-            this.level_plaque.TabIndex = 7;
-            this.level_plaque.TabStop = false;
-            // 
             // exp_label
             // 
             this.exp_label.AutoSize = true;
@@ -378,15 +373,6 @@
             this.progressBar2.TabIndex = 4;
             this.progressBar2.Value = 30;
             // 
-            // pictureBox2
-            // 
-            this.pictureBox2.Image = global::Curry_Client.Properties.Resources.unknownpicture;
-            this.pictureBox2.Location = new System.Drawing.Point(11, 15);
-            this.pictureBox2.Name = "pictureBox2";
-            this.pictureBox2.Size = new System.Drawing.Size(100, 100);
-            this.pictureBox2.TabIndex = 4;
-            this.pictureBox2.TabStop = false;
-            // 
             // tableLayoutPanel1
             // 
             this.tableLayoutPanel1.ColumnCount = 6;
@@ -409,6 +395,24 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(517, 404);
             this.tableLayoutPanel1.TabIndex = 0;
+            // 
+            // level_plaque
+            // 
+            this.level_plaque.Image = global::Curry_Client.Properties.Resources.plaque1;
+            this.level_plaque.Location = new System.Drawing.Point(280, 19);
+            this.level_plaque.Name = "level_plaque";
+            this.level_plaque.Size = new System.Drawing.Size(70, 90);
+            this.level_plaque.TabIndex = 7;
+            this.level_plaque.TabStop = false;
+            // 
+            // pictureBox2
+            // 
+            this.pictureBox2.Image = global::Curry_Client.Properties.Resources.unknownpicture;
+            this.pictureBox2.Location = new System.Drawing.Point(11, 15);
+            this.pictureBox2.Name = "pictureBox2";
+            this.pictureBox2.Size = new System.Drawing.Size(100, 100);
+            this.pictureBox2.TabIndex = 4;
+            this.pictureBox2.TabStop = false;
             // 
             // badge_page
             // 
@@ -632,11 +636,33 @@
             this.label7.TabIndex = 12;
             this.label7.Text = "contact";
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(283, 14);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(142, 23);
+            this.button1.TabIndex = 13;
+            this.button1.Text = "Enable Super User";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(431, 14);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(142, 23);
+            this.button2.TabIndex = 14;
+            this.button2.Text = "Disable Super User";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
+            // 
             // Form1
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.BackColor = System.Drawing.Color.SteelBlue;
             this.ClientSize = new System.Drawing.Size(767, 624);
+            this.Controls.Add(this.button2);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
@@ -719,6 +745,8 @@
         private System.Windows.Forms.Label item_type;
         private System.Windows.Forms.Label item_name;
         private System.Windows.Forms.Button item_use;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button button2;
 
 
 

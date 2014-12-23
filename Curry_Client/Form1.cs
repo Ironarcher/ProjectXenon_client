@@ -19,6 +19,7 @@ namespace Curry_Client
     public partial class Form1 : Form
     {
         private byte[] logincode;
+        private bool super = false;
         private const int port = 32320;
         // ManualResetEvent instances signal completion.
         private static ManualResetEvent connectDone =
@@ -66,12 +67,13 @@ namespace Curry_Client
             }
         }
          */
-
+        TabPage prevtab;
         private void Form1_Load(object sender, EventArgs e)
         {
             AllocConsole();
             Console.WriteLine("Client Launch");
             //connect("127.0.0.1");
+            prevtab = tabControl1.SelectedTab;
             logincode = new byte[3];
         }
 
@@ -269,6 +271,72 @@ namespace Curry_Client
         private void label1_MouseEnter(object sender, EventArgs e)
         {
             label1.ForeColor = Color.FromArgb(255, 100, 100);
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            enableSuperUser();
+        }
+
+        private void tabPage1_Click(object sender, EventArgs e)
+        {
+
+        }
+        private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (tabControl1.SelectedTab.Text == "Super User")//your specific tabname
+            {
+                tabControl1.SelectedTab = prevtab;
+                FormSuperUser lg = new FormSuperUser();
+                lg.ShowDialog();
+            }
+        }
+
+        private void tabControl1_Selecting(object sender, TabControlCancelEventArgs e)
+        {
+            try
+            {
+                if (tabControl1.SelectedTab.Text != "Super User")
+                {
+                    prevtab = tabControl1.SelectedTab;
+                }
+            }
+            catch
+            {
+
+            }
+        }
+        private void enableSuperUser()
+        {
+            super = true;
+            bool flag = false;
+            foreach (TabPage t in tabControl1.TabPages)
+            {
+                if (t.Text == "Super User")
+                {
+                    flag = true;
+                }
+            }
+            if (!flag)
+            {
+                tabControl1.TabPages.Add(new TabPage().Text = "Super User");
+            }
+        }
+        private void disableSuperUser()
+        {
+            super = false;
+            foreach (TabPage t in tabControl1.TabPages)
+            {
+                if (t.Text == "Super User")
+                {
+                    tabControl1.TabPages.Remove(t);
+                }
+            }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            disableSuperUser();
         }
     }
 }

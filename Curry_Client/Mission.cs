@@ -14,14 +14,16 @@ namespace Curry_Client
         private String AnswerC;
         private String AnswerD;
         private char chosenAnswer;
+        private int correctAnswer;
         //Multiple Choice Only
-        public Question(String tprompt, String aa, String ab, String ac, String ad)
+        public Question(String tprompt, String aa, String ab, String ac, String ad, int correctanswer)
         {
             prompt = tprompt;
             AnswerA = aa;
             AnswerB = ab;
             AnswerC = ac;
             AnswerD = ad;
+            correctAnswer = correctanswer;
         }
         public String getPrompt()
         {
@@ -53,13 +55,14 @@ namespace Curry_Client
     }
     class Mission
     {
+        public int xpreward = 0;
         public Mission(EnumMission mtype)
         {
             this.type = mtype;
         }
         public EnumMission type;
         public String title;
-        //public Question[] questions;
+        public Question[] questions;
         public bool AutoGrade
         {
             get { return this.type == EnumMission.MultipleChoice; }
@@ -72,6 +75,6 @@ namespace Curry_Client
     }
     enum EnumMission
     {
-        MultipleChoice, FreeResponse, FileUpload
+        MultipleChoice, FreeResponse, FileUpload, Text
     }
 }
