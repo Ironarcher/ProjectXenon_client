@@ -338,6 +338,9 @@ namespace Curry_Server
                             byte[] userpacket = new byte[3];
                             byte[] finalpacket = new byte[60];
                             finalpacket[0] = 6;
+                            String[] b = content.Split('\0');
+                            String fn = b[0].Substring(1);
+                            int fnn = Convert.ToInt32(fn);
                             userpacket[0] = state.buffer[1];
                             userpacket[1] = state.buffer[2];
                             userpacket[2] = state.buffer[3];
@@ -370,8 +373,9 @@ namespace Curry_Server
                                 fnl.CopyTo(finalpacket, 5);
 
                                 //Add payload (String array) here:
-                                String[] payload = new String[1];
-                                payload[0] = "null";
+                                String[] payload = new String[2];
+                                payload[0] = User.getFirstName(fnn);
+                                payload[1] = User.getLastName(fnn);
                                 int arcount = 6;
                                 foreach (String s in payload)
                                 {

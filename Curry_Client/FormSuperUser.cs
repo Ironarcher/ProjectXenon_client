@@ -56,6 +56,28 @@ namespace Curry_Client
 
         }
 
+        private void sendStringPacket(int userID)
+        {
+            byte[] packet = new byte[10];
+            //packet type 2 is an XP request/transmission protocol
+            //packet bytes 2-5 are authorization bytes
+            packet[0] = 6;
+            byte[] ae = Encoding.ASCII.GetBytes(userID.ToString());
+            ae.CopyTo(packet, 1);
+            int te = Encoding.ASCII.GetByteCount(userID.ToString());
+            byte[] fnl = Encoding.ASCII.GetBytes("\0");
+            fnl.CopyTo(packet, te+1);
+            te += 1;
+            packet[1+te] = logincode[0];
+            packet[2+te] = logincode[1];
+            packet[3+te] = logincode[2];
+            Console.WriteLine("Verification code: " + Convert.ToInt32(logincode[0]) + Convert.ToInt32(logincode[1]) + Convert.ToInt32(logincode[2]));
+            byte[] temp = Encoding.ASCII.GetBytes("<EOF>");
+            temp.CopyTo(packet, 4+te);
+            connect(ServerIP, packet);
+        }
+
+        /*
         private void sendStringPacket()
         {
             byte[] packet = new byte[60];
@@ -85,7 +107,7 @@ namespace Curry_Client
             tempb.CopyTo(packet, arcount);
             connect(ServerIP, packet);
         }
-
+        */
         //IP_AD is the IP address of the server
         private static void connect(string IP_AD, byte[] data)
         {
@@ -201,7 +223,7 @@ namespace Curry_Client
                                 //Verified the server and the server accepted the packet
                                 String[] items = response.Split('\0');
                                 //CHANGE NUMBER OF STRINGS TO END WITH
-                                String[] finalresult = new String[3];
+                                String[] finalresult = new String[2];
                                 Console.WriteLine("SUCCESS");
                                 for(int f = 0; f<3; f++)
                                 {
