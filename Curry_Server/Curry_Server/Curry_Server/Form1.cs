@@ -334,6 +334,67 @@ namespace Curry_Server
                             }
                             SendBytes(handler, xppacket);
                         }
+                        else if (state.buffer[0] == 6)
+                        {
+                            //Received XP protocol
+                            byte[] userpacket = new byte[3];
+                            byte[] finalpacket = new byte[60];
+                            finalpacket[0] = 6;
+                            userpacket[0] = state.buffer[1];
+                            userpacket[1] = state.buffer[2];
+                            userpacket[2] = state.buffer[3];
+                            bool iflag = false;
+                            int userID = 0;
+                            Dictionary<byte[], Int32>.KeyCollection keyColl = userList.Keys;
+                            foreach (byte[] cc in keyColl)
+                            {
+                                if (cc[0] == userpacket[0] && cc[1] == userpacket[1] && cc[2] == userpacket[2])
+                                {
+                                    iflag = true;
+                                    userID = userList[userpacket];
+                                    break;
+                                }
+                                else
+                                {
+                                    iflag = false;
+                                }
+                            }
+                            if (iflag && User.getSuperUser(userID))
+                            {
+                                finalpacket[1] = 1; //Indicates success
+                                finalpacket[2] = userpacket[0];
+                                finalpacket[3] = userpacket[1];
+                                finalpacket[4] = userpacket[2];
+                                byte[] fnl = Encoding.ASCII.GetBytes("\0");
+                                fnl.CopyTo(finalpacket, 5);
+
+                                //Add payload (String array) here:
+                                String[] payload = new String[1];
+                                payload[0] = "null";
+                                int arcount = 6;
+                                foreach (String s in payload)
+                                {
+                                    if (s != null || s != String.Empty)
+                                    {
+                                        byte[] tempa = Encoding.ASCII.GetBytes(s);
+                                        tempa.CopyTo(finalpacket, arcount);
+                                        fnl.CopyTo(finalpacket, arcount + 1);
+                                        arcount += tempa.Length + 1;
+                                    }
+                                }
+                                byte[] tempb = Encoding.ASCII.GetBytes("<EOF>");
+                                tempb.CopyTo(finalpacket, arcount);
+                            }
+                            else
+                            {
+                                Console.WriteLine("Failure");
+                                finalpacket[1] = 0; //Indicates failure
+                                finalpacket[2] = 0;
+                                finalpacket[3] = 0;
+                                finalpacket[4] = 0;
+                            }
+                            SendBytes(handler, finalpacket);
+                        }
 
 
                         // All the data has been read from the 

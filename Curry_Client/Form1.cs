@@ -334,6 +334,8 @@ namespace Curry_Client
             {
                 tabControl1.SelectedTab = prevtab;
                 FormSuperUser lg = new FormSuperUser();
+                lg.serverIP = this.serverIP;
+                lg.login = this.login;
                 lg.ShowDialog();
             }
         }
