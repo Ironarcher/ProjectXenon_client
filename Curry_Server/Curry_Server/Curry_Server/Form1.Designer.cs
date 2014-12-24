@@ -61,7 +61,6 @@
             this.consoleBox.ReadOnly = true;
             this.consoleBox.Size = new System.Drawing.Size(412, 290);
             this.consoleBox.TabIndex = 2;
-            this.consoleBox.TextChanged += new System.EventHandler(this.consoleBox_TextChanged);
             // 
             // first_promote
             // 

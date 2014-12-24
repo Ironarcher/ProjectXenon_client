@@ -59,10 +59,6 @@ namespace Curry_Server
             WriteToUserConsole("Server Launched!");
         }
 
-        private void consoleBox_TextChanged(object sender, EventArgs e)
-        {
-            
-        }
         public static void makeDirectories()
         {
             string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
@@ -95,6 +91,7 @@ namespace Curry_Server
 
         private void promote_button_Click(object sender, EventArgs e)
         {
+            User.setFirstName(1, "Arpad");
             int promoteduserid = User.getID(first_promote.Text, last_promote.Text);
             Console.WriteLine(promoteduserid);
             if (!User.getSuperUser(promoteduserid))
@@ -140,7 +137,7 @@ namespace Curry_Server
     public class AsynchronousSocketListener
     {
         // Thread signal.
-        private static Dictionary<Byte[], Int32> userList = new Dictionary<Byte[], Int32>();
+        private static Dictionary<Byte[], Int32> userList = new Dictionary<Byte[], Int32>(new ByteArrayComparer());
         public static ManualResetEvent allDone = new ManualResetEvent(false);
 
         public AsynchronousSocketListener()
@@ -277,6 +274,7 @@ namespace Curry_Server
                                 userpacket[1] = loginpacket[3];
                                 userpacket[2] = loginpacket[4];
                                 //USER FOUND WITH ID 'id'
+                                Console.WriteLine("ID IS" + id);
                                 userList.Add(userpacket, id);
                                 
                             }
@@ -336,7 +334,7 @@ namespace Curry_Server
                         }
                         else if (state.buffer[0] == 6)
                         {
-                            //Received XP protocol
+                            //Received String Array protocol
                             byte[] userpacket = new byte[3];
                             byte[] finalpacket = new byte[60];
                             finalpacket[0] = 6;
@@ -350,8 +348,10 @@ namespace Curry_Server
                             {
                                 if (cc[0] == userpacket[0] && cc[1] == userpacket[1] && cc[2] == userpacket[2])
                                 {
+                                    Console.WriteLine(Encoding.ASCII.GetString(cc));
+                                    Console.WriteLine(userList[userpacket]);
                                     iflag = true;
-                                    userID = userList[userpacket];
+                                        userID = userList[userpacket];
                                     break;
                                 }
                                 else
@@ -361,6 +361,7 @@ namespace Curry_Server
                             }
                             if (iflag && User.getSuperUser(userID))
                             {
+                                Console.WriteLine("Confirmed string array protocol");
                                 finalpacket[1] = 1; //Indicates success
                                 finalpacket[2] = userpacket[0];
                                 finalpacket[3] = userpacket[1];
@@ -374,12 +375,12 @@ namespace Curry_Server
                                 int arcount = 6;
                                 foreach (String s in payload)
                                 {
-                                    if (s != null || s != String.Empty)
+                                    if (s != null && s != String.Empty)
                                     {
                                         byte[] tempa = Encoding.ASCII.GetBytes(s);
                                         tempa.CopyTo(finalpacket, arcount);
-                                        fnl.CopyTo(finalpacket, arcount + 1);
-                                        arcount += tempa.Length + 1;
+                                        fnl.CopyTo(finalpacket, tempa.Length + arcount + 1);
+                                        arcount += tempa.Length + 2;
                                     }
                                 }
                                 byte[] tempb = Encoding.ASCII.GetBytes("<EOF>");
@@ -728,6 +729,7 @@ namespace Curry_Server
                     }
                 }
             }
+            doc.Save(userXML);
         }
         public static void setLastName(int id, String value)
         {
@@ -747,6 +749,7 @@ namespace Curry_Server
                     }
                 }
             }
+            doc.Save(userXML);
         }
         public static void setPassword(int id, String value)
         {
@@ -766,6 +769,7 @@ namespace Curry_Server
                     }
                 }
             }
+            doc.Save(userXML);
         }
         public static void setSuperUser(int id, bool value)
         {
@@ -781,10 +785,17 @@ namespace Curry_Server
                     int tid = Int32.Parse(e.GetAttribute("id"));
                     if (id == tid)
                     {
-                        e.ChildNodes.Item(3).FirstChild.Value = value.ToString();
+                        if (value == true)
+                        {
+                            Console.WriteLine("SUperuser working");
+                            e.ChildNodes.Item(3).FirstChild.Value = "True";
+                        } else{
+                            e.ChildNodes.Item(3).FirstChild.Value = "False";
+                        }
                     }
                 }
             }
+            doc.Save(userXML);
         }
         public static int getID(String firstname, String lastname)
         {
@@ -808,4 +819,37 @@ namespace Curry_Server
         }
     }
 
+    public class ByteArrayComparer : IEqualityComparer<byte[]>
+    {
+        public bool Equals(byte[] left, byte[] right)
+        {
+            if (left == null || right == null)
+            {
+                return left == right;
+            }
+            if (left.Length != right.Length)
+            {
+                return false;
+            }
+            for (int i = 0; i < left.Length; i++)
+            {
+                if (left[i] != right[i])
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+        public int GetHashCode(byte[] key)
+        {
+            if (key == null)
+                throw new ArgumentNullException("key");
+            int sum = 0;
+            foreach (byte cur in key)
+            {
+                sum += cur;
+            }
+            return sum;
+        }
+    }
 }

@@ -77,8 +77,8 @@ namespace Curry_Client
                 if(s != null  || s != String.Empty){
                     byte[] tempa = Encoding.ASCII.GetBytes(s);
                     tempa.CopyTo(packet, arcount);
-                    fnl.CopyTo(packet, arcount + 1);
-                    arcount += tempa.Length+1;
+                    fnl.CopyTo(packet, tempa.Length + arcount + 1);
+                    arcount += tempa.Length+2;
                 }
             }
             byte[] tempb = Encoding.ASCII.GetBytes("<EOF>");
