@@ -442,7 +442,7 @@ namespace Curry_Client
 
         private void button6_Click(object sender, EventArgs e)
         {
-            sendStringPacket();
+            //sendStringPacket();
         }
     }
     public class Group

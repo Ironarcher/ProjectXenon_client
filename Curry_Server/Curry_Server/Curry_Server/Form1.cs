@@ -400,6 +400,26 @@ namespace Curry_Server
                             }
                             SendBytes(handler, finalpacket);
                         }
+                        else if (state.buffer[0] == 7)
+                        {
+                            //Received XP protocol
+                            byte[] userpacket = new byte[3];
+                            byte[] userdeletepacket = new byte[2];
+                            userdeletepacket[0] = 7;
+                            userpacket[0] = state.buffer[1];
+                            userpacket[1] = state.buffer[2];
+                            userpacket[2] = state.buffer[3];
+                            int id = 0;
+                            if (userList.TryGetValue(userpacket, out id))
+                            {
+                                userdeletepacket[1] = 1;
+                            }
+                            else
+                            {
+                                userdeletepacket[1] = 0;
+                            }
+                            SendBytes(handler, userdeletepacket);
+                        }
 
 
                         // All the data has been read from the 

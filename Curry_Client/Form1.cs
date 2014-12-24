@@ -85,6 +85,25 @@ namespace Curry_Client
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool AllocConsole();
 
+        private void eraseUserData()
+        {
+            byte[] packet = new byte[9];
+            //packet type 7 is an user erasing protocol
+            //packet bytes 1-3 are authorization bytes
+            packet[0] = 7;
+            packet[1] = logincode[0];
+            packet[2] = logincode[1];
+            packet[3] = logincode[2];
+            Console.WriteLine("Verification code: " + Convert.ToInt32(logincode[0]) + Convert.ToInt32(logincode[1]) + Convert.ToInt32(logincode[2]));
+            byte[] temp = Encoding.ASCII.GetBytes("<EOF>");
+            temp.CopyTo(packet, 4);
+            connect(ServerIP, packet);
+
+            this.login[0] = 0;
+            this.login[1] = 0;
+            this.login[2] = 0;
+        }
+
         private void requestXP()
         {
             byte[] packet = new byte[9];
@@ -218,6 +237,15 @@ namespace Curry_Client
                                 Console.WriteLine("XP Received: " + finalxp);
                             }
                         }
+                        else if (receivedpacket[0] == 7)
+                        {
+                            //Experience Point transmission protocol
+                            if (receivedpacket[1] == 1)
+                            {
+                                //Verified the server and the server accepted the packet
+                                Console.WriteLine("Verification Code Erased from Server");
+                            }
+                        }
                     }
                     // Signal that all bytes have been received.
                     receiveDone.Set();
@@ -282,15 +310,30 @@ namespace Curry_Client
 
         private void label1_Click(object sender, EventArgs e)
         {
-            loginform lg = new loginform(this);
-            lg.ShowDialog();
+            if(label1.Text == "login") 
+            {
+                loginform lg = new loginform(this);
+                lg.ShowDialog();
+                label1.Text = "logout";
+            }
+            else if (label1.Text == "logout")
+            {
+                eraseUserData();
+                label1.Text = "login";
+            }
         }
 
 
         public byte[] login
         {
-            get { return logincode; }
-            set { logincode = value; }
+            get
+            {
+                return logincode; 
+            }
+            set 
+            {
+                logincode = value; 
+            }
         }
 
         public String serverIP
