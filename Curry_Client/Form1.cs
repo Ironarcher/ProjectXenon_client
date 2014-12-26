@@ -85,42 +85,163 @@ namespace Curry_Client
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool AllocConsole();
 
-        private void eraseUserData()
+        private void requestData(int indent)
         {
             byte[] packet = new byte[9];
-            //packet type 7 is an user erasing protocol
-            //packet bytes 1-3 are authorization bytes
-            packet[0] = 7;
+            if (indent > 0 && indent < 256)
+            {
+                packet[0] = Convert.ToByte(indent);
+            }
+            else
+            {
+                Console.WriteLine("Packet Indentification overflow error!");
+            }
             packet[1] = logincode[0];
             packet[2] = logincode[1];
             packet[3] = logincode[2];
-            Console.WriteLine("Verification code: " + Convert.ToInt32(logincode[0]) + Convert.ToInt32(logincode[1]) + Convert.ToInt32(logincode[2]));
             byte[] temp = Encoding.ASCII.GetBytes("<EOF>");
             temp.CopyTo(packet, 4);
             connect(ServerIP, packet);
+        }
 
+        private void requestXP()
+        {
+            requestData(2);
+        }
+
+        private void requestLevel()
+        {
+            requestData(3);
+        }
+
+        private void requestMinXP()
+        {
+            requestData(4);
+        }
+
+        private void requestMaxXP()
+        {
+            requestData(4);
+        }
+
+        private void getAvailableMissions()
+        {
+            requestData(15);
+        }
+
+        private void getFinishedMissions()
+        {
+            requestData(16);
+        }
+
+        private void getCurrentAvatar()
+        {
+            requestData(17);
+        }
+
+        private void setAvatarr()
+        {
+            
+        }
+
+        private void getLeaderboardData()
+        {
+            requestData(20);
+        }
+
+        private void getBadgesEarned()
+        {
+            requestData(19);
+        }
+
+        private void sendChatMsg(String message)
+        {
+            
+        }
+
+        private void getChatUpdate()
+        {
+            requestData(22);
+        }
+
+        private void getGold()
+        {
+            requestData(23);
+        }
+
+        private void getMana()
+        {
+            requestData(24);
+        }
+
+        private void getInv()
+        {
+            requestData(25);
+        }
+
+        private void startMission(int missionID)
+        {
+            //modify data packet with information to start sending questions over/starting a timer (requires MissionID)
+        }
+
+        private void getSuperUser(int userID)
+        {
+            //modify to add a blank for userID
+        }
+
+
+        private void eraseUserData()
+        {
+            requestData(7);
             this.login[0] = 0;
             this.login[1] = 0;
             this.login[2] = 0;
         }
 
-        private void requestXP()
+        private void modifyPassword()
         {
-            byte[] packet = new byte[9];
-            //packet type 2 is an XP request/transmission protocol
-            //packet bytes 1-3 are authorization bytes
-            packet[0] = 2;
-            packet[1] = logincode[0];
-            packet[2] = logincode[1];
-            packet[3] = logincode[2];
-            Console.WriteLine("Verification code: " + Convert.ToInt32(logincode[0]) + Convert.ToInt32(logincode[1]) + Convert.ToInt32(logincode[2]));
-            byte[] temp = Encoding.ASCII.GetBytes("<EOF>");
-            temp.CopyTo(packet, 4);
-            connect(ServerIP, packet);
+
         }
 
-        //IP_AD is the IP address of the server
+        private void verifyPassword()
+        {
+
+        }
+
         private static void connect(string IP_AD, byte[] data)
+        {
+            System.Threading.Thread newThread = new System.Threading.Thread(contactServer(IP_AD, data));
+            newThread.Start();
+        }
+
+        public static void blah()
+        {
+
+        }
+
+        private static void ConnectCallback(IAsyncResult ar)
+        {
+            try
+            {
+                // Retrieve the socket from the state object.
+                Socket client = (Socket)ar.AsyncState;
+
+                // Complete the connection.
+                client.EndConnect(ar);
+
+                Console.WriteLine("Socket connected to " + client.RemoteEndPoint.ToString());
+
+                // Signal that the connection has been made.
+                connectDone.Set();
+            }
+            catch (Exception e)
+            {
+                String p = e.ToString();
+                Console.WriteLine(p);
+            }
+        }
+
+        public static void contactServer(string IP_AD, byte[] data)
         {
             try
             {
@@ -148,34 +269,12 @@ namespace Curry_Client
                 // Release the socket.
                 client.Shutdown(SocketShutdown.Both);
                 client.Close();
-            
+
 
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
-            }
-        }
-
-        private static void ConnectCallback(IAsyncResult ar)
-        {
-            try
-            {
-                // Retrieve the socket from the state object.
-                Socket client = (Socket)ar.AsyncState;
-
-                // Complete the connection.
-                client.EndConnect(ar);
-
-                Console.WriteLine("Socket connected to " + client.RemoteEndPoint.ToString());
-
-                // Signal that the connection has been made.
-                connectDone.Set();
-            }
-            catch (Exception e)
-            {
-                String p = e.ToString();
-                Console.WriteLine(p);
             }
         }
 
