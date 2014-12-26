@@ -12,6 +12,9 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Text;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.IO;
+
 
 namespace Curry_Client
 {
@@ -19,7 +22,6 @@ namespace Curry_Client
     public partial class Form1 : Form
     {
         private String ServerIP;
-        private static byte[] receivedpacket;
         private static byte[] logincode;
         private int currentXP;
         private bool super = false;
@@ -33,7 +35,6 @@ namespace Curry_Client
             new ManualResetEvent(false);
 
         // The response from the remote device.
-        private static String response = String.Empty;
 
         public Form1()
         {
@@ -210,13 +211,9 @@ namespace Curry_Client
 
         private static void connect(string IP_AD, byte[] data)
         {
-            System.Threading.Thread newThread = new System.Threading.Thread(contactServer(IP_AD, data));
-            newThread.Start();
-        }
-
-        public static void blah()
-        {
-
+            //Thread t = new Thread(() => serverContact(IP_AD, data));
+            //t.Start(data);
+            System.Threading.ThreadPool.QueueUserWorkItem(serverContact, new object[] {IP_AD, Convert.ToBase64String(data)});
         }
 
         private static void ConnectCallback(IAsyncResult ar)
@@ -241,10 +238,25 @@ namespace Curry_Client
             }
         }
 
-        public static void contactServer(string IP_AD, byte[] data)
+        public static byte[] ObjectToByteArray(Object obj)
+        {
+            if (obj == null)
+                return null;
+            BinaryFormatter bf = new BinaryFormatter();
+            MemoryStream ms = new MemoryStream();
+            bf.Serialize(ms, obj);
+            return ms.ToArray();
+        }
+
+        public static void serverContact(object state)
         {
             try
             {
+                object[] array = state as object[];
+                String IP_AD = Convert.ToString(array[0]);
+                byte[] data = Convert.FromBase64String(array[1].ToString());
+                byte[] bytes = new byte[1024];
+
                 //init
                 IPAddress ipAddress = IPAddress.Parse(IP_AD);
                 IPEndPoint remoteEP = new IPEndPoint(ipAddress, port);
@@ -252,25 +264,18 @@ namespace Curry_Client
                     SocketType.Stream, ProtocolType.Tcp);
 
                 //Connect through the remote socket (endpoint)
-                client.BeginConnect(remoteEP,
-                    new AsyncCallback(ConnectCallback), client);
+                client.Connect(remoteEP);
 
                 // Send test data to the remote device.
-                SendBytes(client, data);
-                sendDone.WaitOne();
+                client.Send(data);
 
                 // Receive the response from the remote device.
-                Receive(client);
-                receiveDone.WaitOne();
-
-                // Write the response to the console.
-                Console.WriteLine("Response received : " + response);
+                int bytesRec = client.Receive(bytes);
+                receive(bytes, bytesRec);
 
                 // Release the socket.
                 client.Shutdown(SocketShutdown.Both);
                 client.Close();
-
-
             }
             catch (Exception e)
             {
@@ -278,133 +283,30 @@ namespace Curry_Client
             }
         }
 
-        private static void Receive(Socket client)
+        public static void receive(byte[] receivedpacket, int packetlength)
         {
-            try
+            String response = Encoding.ASCII.GetString(receivedpacket);
+            Console.WriteLine("Response: " + response);
+            if (receivedpacket[0] == 2)
             {
-                // Create the state object.
-                StateObject state = new StateObject();
-                state.workSocket = client;
-
-                // Begin receiving the data from the remote device.
-                client.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
-                    new AsyncCallback(ReceiveCallback), state);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
-        }
-
-        private static void ReceiveCallback(IAsyncResult ar)
-        {
-            try
-            {
-                // Retrieve the state object and the client socket 
-                // from the asynchronous state object.
-                StateObject state = (StateObject)ar.AsyncState;
-                Socket client = state.workSocket;
-
-                // Read data from the remote device.
-                int bytesRead = client.EndReceive(ar);
-
-                if (bytesRead > 0)
+                //Experience Point transmission protocol
+                if (receivedpacket[1] == 1 && receivedpacket[2] == logincode[0] && receivedpacket[3] == logincode[1] && receivedpacket[4] == logincode[2])
                 {
-                    // There might be more data, so store the data received so far.
-                    state.sb.Append(Encoding.ASCII.GetString(state.buffer, 0, bytesRead));
-
-                    // Get the rest of the data.
-                    client.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
-                        new AsyncCallback(ReceiveCallback), state);
-                }
-                else
-                {
-                    // All the data has arrived; put it in response.
-                    if (state.sb.Length > 1)
-                    {
-                        response = state.sb.ToString();
-                        receivedpacket = state.buffer;
-                        Console.WriteLine("Response: " + response);
-                        if (receivedpacket[0] == 2)
-                        {
-                            //Experience Point transmission protocol
-                            if (receivedpacket[1] == 1 && receivedpacket[2] == logincode[0] && receivedpacket[3] == logincode[1] && receivedpacket[4] == logincode[2])
-                            {
-                                //Verified the server and the server accepted the packet
-                                String[] items = response.Split('\0');
-                                int finalxp = Convert.ToInt32(items[1]);
-                                Console.WriteLine("XP Received: " + finalxp);
-                            }
-                        }
-                        else if (receivedpacket[0] == 7)
-                        {
-                            //Experience Point transmission protocol
-                            if (receivedpacket[1] == 1)
-                            {
-                                //Verified the server and the server accepted the packet
-                                Console.WriteLine("Verification Code Erased from Server");
-                            }
-                        }
-                    }
-                    // Signal that all bytes have been received.
-                    receiveDone.Set();
+                    //Verified the server and the server accepted the packet
+                    String[] items = response.Split('\0');
+                    int finalxp = Convert.ToInt32(items[1]);
+                    Console.WriteLine("XP Received: " + finalxp);
                 }
             }
-            catch (Exception e)
+            else if (receivedpacket[0] == 7)
             {
-                Console.WriteLine(e.ToString());
+                //Experience Point transmission protocol
+                if (receivedpacket[1] == 1)
+                {
+                    //Verified the server and the server accepted the packet
+                    Console.WriteLine("Verification Code Erased from Server");
+                }
             }
-        }
-
-        private static void Send(Socket client, String data)
-        {
-            // Convert the string data to byte data using ASCII encoding.
-            byte[] byteData = Encoding.ASCII.GetBytes(data);
-
-            // Begin sending the data to the remote device.
-            client.BeginSend(byteData, 0, byteData.Length, 0,
-                new AsyncCallback(SendCallback), client);
-        }
-
-        private static void SendBytes(Socket client, byte[] byteData)
-        {
-
-            // Begin sending the data to the remote device.
-            client.BeginSend(byteData, 0, byteData.Length, 0,
-                new AsyncCallback(SendCallback), client);
-        }
-
-        private static void SendCallback(IAsyncResult ar)
-        {
-            try
-            {
-                // Retrieve the socket from the state object.
-                Socket client = (Socket)ar.AsyncState;
-
-                // Complete sending the data to the remote device.
-                int bytesSent = client.EndSend(ar);
-                Console.WriteLine("Sent " + bytesSent + " bytes to server.");
-
-                // Signal that all bytes have been sent.
-                sendDone.Set();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
-        }
-
-        // State object for receiving data from remote device.
-        public class StateObject
-        {
-            // Client socket.
-            public Socket workSocket = null;
-            // Size of receive buffer.
-            public const int BufferSize = 256;
-            // Receive buffer.
-            public byte[] buffer = new byte[BufferSize];
-            // Received data string.
-            public StringBuilder sb = new StringBuilder();
         }
 
         private void label1_Click(object sender, EventArgs e)
