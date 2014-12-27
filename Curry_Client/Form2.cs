@@ -54,9 +54,10 @@ namespace Curry_Client
             
         }
 
-        public void verify()
+        private void verify(bool isSuperUser)
         {
             this.mainForm.login = verificationcode;
+            this.mainForm.getSuperUser = isSuperUser;
             //this.mainForm.serverIP = masterServerList[comboBox1.SelectedItem.ToString()];
         }
 
@@ -79,7 +80,7 @@ namespace Curry_Client
             closing.CopyTo(packet, firstnamebox.Text.Length + lastnamebox.Text.Length + passwordbox.Text.Length + 4);
             return packet;
         }
-
+         
         //IP_AD is the IP address of the server
         private void connect(string IP_AD)
         {
@@ -127,8 +128,11 @@ namespace Curry_Client
                         Console.WriteLine("Login Packet Authorization complete");
                         //textAlign();
 
+                        bool su = false;
+                        if (receivedpacket[5] == 1) su = true;
+
                         //Transfer to main form
-                        verify();
+                        verify(su);
                         this.Hide();
                         
                         mainForm.Show();

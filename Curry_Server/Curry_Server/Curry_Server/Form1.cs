@@ -45,7 +45,7 @@ namespace Curry_Server
             Console.WriteLine("Server Launch");
             WriteToUserConsole("Teach-Play Server launched at " + getIP());
             makeDirectories();
-            //User.createUser("Joseph", "Stafford", "password", false);
+            //User.createUser("Arpad", "Kovesd", "password", true);
             consoleBox.BackColor = System.Drawing.SystemColors.Window;
         }
 
@@ -237,7 +237,7 @@ namespace Curry_Server
                     {
                         Console.WriteLine("<EOF> Found with a buffer of " + state.buffer[0]);
                         //Process data here:
-                        byte[] loginpacket = new byte[5];
+                        byte[] loginpacket = new byte[6];
                         if (state.buffer[0] == 1)
                         {
                             //Packet type: Login verification protocol
@@ -273,6 +273,15 @@ namespace Curry_Server
                                 userpacket[0] = loginpacket[2];
                                 userpacket[1] = loginpacket[3];
                                 userpacket[2] = loginpacket[4];
+
+                                if (User.getSuperUser(id))
+                                {
+                                    loginpacket[5] = 1;
+                                }
+                                else
+                                {
+                                    loginpacket[5] = 0;
+                                }
                                 //USER FOUND WITH ID 'id'
                                 Console.WriteLine("ID IS" + id);
                                 userList.Add(userpacket, id);
@@ -290,31 +299,14 @@ namespace Curry_Server
                             userpacket[0] = state.buffer[1];
                             userpacket[1] = state.buffer[2];
                             userpacket[2] = state.buffer[3];
-                            Console.WriteLine("UserList size:" + userList.Keys.Count);
-                            Console.WriteLine("Verification code: " + Convert.ToInt32(userpacket[0]) + Convert.ToInt32(userpacket[1]) + Convert.ToInt32(userpacket[2]));
-                            //Console.WriteLine("Verification code: " + Convert.ToInt32(userList.Keys.ToString()));
-                            //int id = 0;
-                            //if (userList.TryGetValue(userpacket, out id))
-                            //{
-                            bool xpflag = false;
-                            Dictionary<byte[], Int32>.KeyCollection keyColl = userList.Keys;
-                            foreach(byte[] cc in keyColl){
-                                if (cc[0] == userpacket[0] && cc[1] == userpacket[1] && cc[2] == userpacket[2])
-                                {
-                                    xpflag = true;
-                                    break;
-                                }
-                                else
-                                {
-                                    xpflag = false;
-                                }
-                            }
-                            if(xpflag){
+                            int id = 0;
+                            if (userList.TryGetValue(userpacket, out id))
+                            {
                                 xppacket[1] = 1; //Indicates success
                                 xppacket[2] = userpacket[0];
                                 xppacket[3] = userpacket[1];
                                 xppacket[4] = userpacket[2];
-                                int xp = 200;
+                                int xp = User.getXP(id);
                                 //retrieve xp from xml!
                                 byte[] fnl = Encoding.ASCII.GetBytes("\0");
                                 fnl.CopyTo(xppacket, 5);
@@ -344,25 +336,8 @@ namespace Curry_Server
                             userpacket[0] = state.buffer[1];
                             userpacket[1] = state.buffer[2];
                             userpacket[2] = state.buffer[3];
-                            bool iflag = false;
-                            int userID = 0;
-                            Dictionary<byte[], Int32>.KeyCollection keyColl = userList.Keys;
-                            foreach (byte[] cc in keyColl)
-                            {
-                                if (cc[0] == userpacket[0] && cc[1] == userpacket[1] && cc[2] == userpacket[2])
-                                {
-                                    Console.WriteLine(Encoding.ASCII.GetString(cc));
-                                    Console.WriteLine(userList[userpacket]);
-                                    iflag = true;
-                                        userID = userList[userpacket];
-                                    break;
-                                }
-                                else
-                                {
-                                    iflag = false;
-                                }
-                            }
-                            if (iflag && User.getSuperUser(userID))
+                            int id = 0;
+                            if (userList.TryGetValue(userpacket, out id))
                             {
                                 Console.WriteLine("Confirmed string array protocol");
                                 finalpacket[1] = 1; //Indicates success
@@ -402,7 +377,7 @@ namespace Curry_Server
                         }
                         else if (state.buffer[0] == 7)
                         {
-                            //Received XP protocol
+                            //Remove user from logged in user's list
                             byte[] userpacket = new byte[3];
                             byte[] userdeletepacket = new byte[2];
                             userdeletepacket[0] = 7;
@@ -413,12 +388,43 @@ namespace Curry_Server
                             if (userList.TryGetValue(userpacket, out id))
                             {
                                 userdeletepacket[1] = 1;
+                                userList.Remove(userpacket);
                             }
                             else
                             {
                                 userdeletepacket[1] = 0;
                             }
                             SendBytes(handler, userdeletepacket);
+                        }
+                        else if (state.buffer[0] == 27)
+                        {
+                            //Superuser processing (return a boolean if the current user is a superuser)
+                            byte[] userpacket = new byte[3];
+                            byte[] payload = new byte[5];
+                            payload[0] = 23;
+                            userpacket[0] = state.buffer[1];
+                            userpacket[1] = state.buffer[2];
+                            userpacket[2] = state.buffer[3];
+                            payload[1] = userpacket[0];
+                            payload[2] = userpacket[1];
+                            payload[3] = userpacket[2];
+                            int id = 0;
+                            if (userList.TryGetValue(userpacket, out id))
+                            {
+                                if (User.getSuperUser(userList[userpacket]))
+                                {
+                                    payload[4] = 1;
+                                }
+                                else
+                                {
+                                    payload[4] = 0;
+                                }
+                            }
+                            else
+                            {
+                                payload[4] = 0;
+                            }
+                            SendBytes(handler, payload);
                         }
 
 
@@ -594,6 +600,36 @@ namespace Curry_Server
             set { userList = value;}
         }
     }
+
+    public class Settings
+    {
+        public static String userXML = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "//TeachPlay//Server//serversettubgs.xml";
+        public static String getFirstLevelXp()
+        {
+            XmlDocument doc = new XmlDocument();
+            doc.Load(userXML);
+            XmlNodeList xnList = doc.SelectNodes("/generalsettings");
+            XmlNode xn = xnList[0];
+            return xn["firstlevelxp"].InnerText;
+        }
+        public static String getLevelCap()
+        {
+            XmlDocument doc = new XmlDocument();
+            doc.Load(userXML);
+            XmlNodeList xnList = doc.SelectNodes("/generalsettings");
+            XmlNode xn = xnList[0];
+            return xn["levelcap"].InnerText;
+        }
+        public static String getMultipler()
+        {
+            XmlDocument doc = new XmlDocument();
+            doc.Load(userXML);
+            XmlNodeList xnList = doc.SelectNodes("/generalsettings");
+            XmlNode xn = xnList[0];
+            return xn["getMultipler"].InnerText;
+        }
+    }
+
     public class User {
         /*
          * getFirstName(id) returns the first name of user with id "id"
@@ -667,6 +703,66 @@ namespace Curry_Server
             }
             return "";
         }
+        public static int getGold(int id)
+        {
+            XmlDocument doc = new XmlDocument();
+            doc.Load(userXML);
+            XmlNodeList elemList = doc.GetElementsByTagName("user");
+            for (int i = 0; i < elemList.Count; i++)
+            {
+                XmlNode x = elemList.Item(i);
+                if (x.NodeType == XmlNodeType.Element)
+                {
+                    XmlElement e = (XmlElement)x;
+                    int tid = Int32.Parse(e.GetAttribute("id"));
+                    if (id == tid)
+                    {
+                        return Convert.ToInt32(e.ChildNodes.Item(4).FirstChild.Value);
+                    }
+                }
+            }
+            return 0;
+        }
+        public static int getMana(int id)
+        {
+            XmlDocument doc = new XmlDocument();
+            doc.Load(userXML);
+            XmlNodeList elemList = doc.GetElementsByTagName("user");
+            for (int i = 0; i < elemList.Count; i++)
+            {
+                XmlNode x = elemList.Item(i);
+                if (x.NodeType == XmlNodeType.Element)
+                {
+                    XmlElement e = (XmlElement)x;
+                    int tid = Int32.Parse(e.GetAttribute("id"));
+                    if (id == tid)
+                    {
+                        return Convert.ToInt32(e.ChildNodes.Item(5).FirstChild.Value);
+                    }
+                }
+            }
+            return 0;
+        }
+        public static int getXP(int id)
+        {
+            XmlDocument doc = new XmlDocument();
+            doc.Load(userXML);
+            XmlNodeList elemList = doc.GetElementsByTagName("user");
+            for (int i = 0; i < elemList.Count; i++)
+            {
+                XmlNode x = elemList.Item(i);
+                if (x.NodeType == XmlNodeType.Element)
+                {
+                    XmlElement e = (XmlElement)x;
+                    int tid = Int32.Parse(e.GetAttribute("id"));
+                    if (id == tid)
+                    {
+                        return Convert.ToInt32(e.ChildNodes.Item(6).FirstChild.Value);
+                    }
+                }
+            }
+            return 0;
+        }
         public static int createUser(String firstname, String lastname, String password, bool superuser)
         {
             XmlDocument doc = new XmlDocument();
@@ -685,10 +781,28 @@ namespace Curry_Server
             pchild.AppendChild(doc.CreateTextNode(password));
             XmlElement schild = doc.CreateElement("superuser");
             schild.AppendChild(doc.CreateTextNode(superuser.ToString()));
+            XmlElement goldchild = doc.CreateElement("gold");
+            schild.AppendChild(doc.CreateTextNode(Convert.ToString(0)));
+            XmlElement manachild = doc.CreateElement("mana");
+            schild.AppendChild(doc.CreateTextNode(Convert.ToString(100)));
+            XmlElement xpchild = doc.CreateElement("xp");
+            schild.AppendChild(doc.CreateTextNode(Convert.ToString(0)));
+            XmlElement groupchild = doc.CreateElement("group");
+            schild.AppendChild(doc.CreateTextNode("None"));
+            XmlElement avatarchild = doc.CreateElement("avatar");
+            schild.AppendChild(doc.CreateTextNode("None"));
+            XmlElement emailchild = doc.CreateElement("email");
+            schild.AppendChild(doc.CreateTextNode("None"));
             e.AppendChild(fchild);
             e.AppendChild(lchild);
             e.AppendChild(pchild);
             e.AppendChild(schild);
+            e.AppendChild(goldchild);
+            e.AppendChild(manachild);
+            e.AppendChild(xpchild);
+            e.AppendChild(groupchild);
+            e.AppendChild(avatarchild);
+            e.AppendChild(emailchild);
             doc.ChildNodes.Item(1).AppendChild(e);
             doc.Save(userXML);
             //doc.FirstChild.AppendChild
@@ -816,6 +930,66 @@ namespace Curry_Server
                         } else{
                             e.ChildNodes.Item(3).FirstChild.Value = "False";
                         }
+                    }
+                }
+            }
+            doc.Save(userXML);
+        }
+        public static void setGold(int id, int value)
+        {
+            XmlDocument doc = new XmlDocument();
+            doc.Load(userXML);
+            XmlNodeList elemList = doc.GetElementsByTagName("user");
+            for (int i = 0; i < elemList.Count; i++)
+            {
+                XmlNode x = elemList.Item(i);
+                if (x.NodeType == XmlNodeType.Element)
+                {
+                    XmlElement e = (XmlElement)x;
+                    int tid = Int32.Parse(e.GetAttribute("id"));
+                    if (id == tid)
+                    {
+                        e.ChildNodes.Item(4).FirstChild.Value = value.ToString();
+                    }
+                }
+            }
+            doc.Save(userXML);
+        }
+        public static void setMana(int id, int value)
+        {
+            XmlDocument doc = new XmlDocument();
+            doc.Load(userXML);
+            XmlNodeList elemList = doc.GetElementsByTagName("user");
+            for (int i = 0; i < elemList.Count; i++)
+            {
+                XmlNode x = elemList.Item(i);
+                if (x.NodeType == XmlNodeType.Element)
+                {
+                    XmlElement e = (XmlElement)x;
+                    int tid = Int32.Parse(e.GetAttribute("id"));
+                    if (id == tid)
+                    {
+                        e.ChildNodes.Item(5).FirstChild.Value = value.ToString();
+                    }
+                }
+            }
+            doc.Save(userXML);
+        }
+        public static void setXP(int id, int value)
+        {
+            XmlDocument doc = new XmlDocument();
+            doc.Load(userXML);
+            XmlNodeList elemList = doc.GetElementsByTagName("user");
+            for (int i = 0; i < elemList.Count; i++)
+            {
+                XmlNode x = elemList.Item(i);
+                if (x.NodeType == XmlNodeType.Element)
+                {
+                    XmlElement e = (XmlElement)x;
+                    int tid = Int32.Parse(e.GetAttribute("id"));
+                    if (id == tid)
+                    {
+                        e.ChildNodes.Item(6).FirstChild.Value = value.ToString();
                     }
                 }
             }

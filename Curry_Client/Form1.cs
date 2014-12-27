@@ -14,7 +14,7 @@ using System.Text;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
-
+using System.Reflection;
 
 namespace Curry_Client
 {
@@ -24,7 +24,8 @@ namespace Curry_Client
         private String ServerIP;
         private static byte[] logincode;
         private int currentXP;
-        private bool super = false;
+        public static Form1 currentForm;
+        public static bool super = false;
         private const int port = 32320;
         // ManualResetEvent instances signal completion.
         private static ManualResetEvent connectDone =
@@ -39,6 +40,7 @@ namespace Curry_Client
         public Form1()
         {
             InitializeComponent();
+            currentForm = this;
         }
 
         /*
@@ -185,12 +187,6 @@ namespace Curry_Client
             //modify data packet with information to start sending questions over/starting a timer (requires MissionID)
         }
 
-        private void getSuperUser(int userID)
-        {
-            //modify to add a blank for userID
-        }
-
-
         private void eraseUserData()
         {
             requestData(7);
@@ -295,6 +291,7 @@ namespace Curry_Client
                     //Verified the server and the server accepted the packet
                     String[] items = response.Split('\0');
                     int finalxp = Convert.ToInt32(items[1]);
+                    SetControlPropertyThreadSafe(currentForm.xpcount, "Text", finalxp.ToString());
                     Console.WriteLine("XP Received: " + finalxp);
                 }
             }
@@ -341,6 +338,26 @@ namespace Curry_Client
         {
             get { return ServerIP; }
             set { serverIP = value; }
+        }
+
+        public bool getSuperUser
+        {
+            get 
+            { 
+                return super; 
+            }
+            set 
+            {
+                super = value;
+                if (super)
+                {
+                    enableSuperUser();
+                }
+                else
+                {
+                    disableSuperUser();
+                }
+            }
         }
 
         private void button1_Click_1(object sender, EventArgs e)
@@ -398,7 +415,7 @@ namespace Curry_Client
                 Console.WriteLine(g.ToString());
             }
         }
-        private void enableSuperUser()
+        public void enableSuperUser()
         {
             super = true;
             bool flag = false;
@@ -414,6 +431,7 @@ namespace Curry_Client
                 tabControl1.TabPages.Add(new TabPage().Text = "Super User");
             }
         }
+
         private void disableSuperUser()
         {
             super = false;
@@ -434,6 +452,20 @@ namespace Curry_Client
         private void button_xp_Click(object sender, EventArgs e)
         {
             requestXP();
+        }
+
+        private delegate void SetControlPropertyThreadSafeDelegate(Control control, string propertyName, object propertyValue);
+
+        public static void SetControlPropertyThreadSafe(Control control, string propertyName, object propertyValue)
+        {
+            if (control.InvokeRequired)
+            {
+                control.Invoke(new SetControlPropertyThreadSafeDelegate(SetControlPropertyThreadSafe), new object[] { control, propertyName, propertyValue });
+            }
+            else
+            {
+                control.GetType().InvokeMember(propertyName, BindingFlags.SetProperty, null, control, new object[] { propertyValue });
+            }
         }
     }
 }
