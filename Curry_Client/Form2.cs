@@ -58,6 +58,9 @@ namespace Curry_Client
         {
             this.mainForm.login = verificationcode;
             this.mainForm.getSuperUser = isSuperUser;
+            this.mainForm.requestXP();
+            this.mainForm.requestMinXP();
+            this.mainForm.requestMaxXP();
             //this.mainForm.serverIP = masterServerList[comboBox1.SelectedItem.ToString()];
         }
 

@@ -55,7 +55,7 @@
             this.item_name = new System.Windows.Forms.Label();
             this.inv_level = new System.Windows.Forms.Label();
             this.exp_label = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
+            this.exp_nextlvl = new System.Windows.Forms.Label();
             this.progressBar2 = new System.Windows.Forms.ProgressBar();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.level_plaque = new System.Windows.Forms.PictureBox();
@@ -140,8 +140,6 @@
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.oldMissionList = new System.Windows.Forms.ListBox();
             this.label7 = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.mission_page.SuspendLayout();
             this.groupBox5.SuspendLayout();
@@ -384,7 +382,7 @@
             this.inv_page.Controls.Add(this.groupBox6);
             this.inv_page.Controls.Add(this.inv_level);
             this.inv_page.Controls.Add(this.exp_label);
-            this.inv_page.Controls.Add(this.label3);
+            this.inv_page.Controls.Add(this.exp_nextlvl);
             this.inv_page.Controls.Add(this.progressBar2);
             this.inv_page.Controls.Add(this.tableLayoutPanel1);
             this.inv_page.Controls.Add(this.level_plaque);
@@ -470,21 +468,21 @@
             this.exp_label.TabIndex = 6;
             this.exp_label.Text = "Current XP:";
             // 
-            // label3
+            // exp_nextlvl
             // 
-            this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("Gadugi", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.Location = new System.Drawing.Point(133, 42);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(97, 19);
-            this.label3.TabIndex = 5;
-            this.label3.Text = "Next level in:";
+            this.exp_nextlvl.AutoSize = true;
+            this.exp_nextlvl.Font = new System.Drawing.Font("Gadugi", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.exp_nextlvl.Location = new System.Drawing.Point(133, 42);
+            this.exp_nextlvl.Name = "exp_nextlvl";
+            this.exp_nextlvl.Size = new System.Drawing.Size(97, 19);
+            this.exp_nextlvl.TabIndex = 5;
+            this.exp_nextlvl.Text = "Next level in:";
             // 
             // progressBar2
             // 
             this.progressBar2.BackColor = System.Drawing.Color.White;
             this.progressBar2.Location = new System.Drawing.Point(127, 98);
-            this.progressBar2.MarqueeAnimationSpeed = 1000;
+            this.progressBar2.MarqueeAnimationSpeed = 10;
             this.progressBar2.Name = "progressBar2";
             this.progressBar2.Size = new System.Drawing.Size(143, 23);
             this.progressBar2.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
@@ -1507,33 +1505,11 @@
             this.label7.TabIndex = 12;
             this.label7.Text = "contact";
             // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(283, 14);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(142, 23);
-            this.button1.TabIndex = 13;
-            this.button1.Text = "Enable Super User";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
-            // 
-            // button2
-            // 
-            this.button2.Location = new System.Drawing.Point(431, 14);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(142, 23);
-            this.button2.TabIndex = 14;
-            this.button2.Text = "Disable Super User";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
-            // 
             // Form1
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.BackColor = System.Drawing.Color.SteelBlue;
             this.ClientSize = new System.Drawing.Size(767, 624);
-            this.Controls.Add(this.button2);
-            this.Controls.Add(this.button1);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
@@ -1602,7 +1578,7 @@
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.ListBox newMissionList2;
         private System.Windows.Forms.Label exp_label;
-        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label exp_nextlvl;
         private System.Windows.Forms.ProgressBar progressBar2;
         private System.Windows.Forms.Label inv_level;
         private System.Windows.Forms.PictureBox level_plaque;
@@ -1622,8 +1598,6 @@
         private System.Windows.Forms.Label item_type;
         private System.Windows.Forms.Label item_name;
         private System.Windows.Forms.Button item_use;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Button button_xp;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
         private System.Windows.Forms.Label label66;

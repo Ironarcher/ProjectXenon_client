@@ -23,7 +23,7 @@ namespace Curry_Client
     {
         private String ServerIP;
         private static byte[] logincode;
-        private int currentXP;
+        public static int currentXP, currentMana, currentGold, currentLevel;
         public static Form1 currentForm;
         public static bool super = false;
         private const int port = 32320;
@@ -82,6 +82,7 @@ namespace Curry_Client
             prevtab = tabControl1.SelectedTab;
             logincode = new byte[3];
             ServerIP = "127.0.0.1";
+            level_plaque.Image = Curry_Client.Properties.Resources.plaque1;
         }
 
         [DllImport("kernel32.dll", SetLastError = true)]
@@ -107,24 +108,24 @@ namespace Curry_Client
             connect(ServerIP, packet);
         }
 
-        private void requestXP()
+        public void requestXP()
         {
             requestData(2);
         }
 
-        private void requestLevel()
+        public void requestLevel()
         {
             requestData(3);
         }
 
-        private void requestMinXP()
+        public void requestMinXP()
         {
             requestData(4);
         }
 
-        private void requestMaxXP()
+        public void requestMaxXP()
         {
-            requestData(4);
+            requestData(5);
         }
 
         private void getAvailableMissions()
@@ -292,12 +293,68 @@ namespace Curry_Client
                     String[] items = response.Split('\0');
                     int finalxp = Convert.ToInt32(items[1]);
                     SetControlPropertyThreadSafe(currentForm.xpcount, "Text", finalxp.ToString());
+                    SetControlPropertyThreadSafe(currentForm.exp_label, "Text", "Current XP: " + finalxp.ToString());
+                    SetControlPropertyThreadSafe(currentForm.progressBar1, "Value", finalxp);
+                    SetControlPropertyThreadSafe(currentForm.progressBar2, "Value", finalxp);
                     Console.WriteLine("XP Received: " + finalxp);
+                }
+            }
+            else if (receivedpacket[0] == 3)
+            {
+                Console.WriteLine("TRYING");
+                //Level transmission protocol
+                if (receivedpacket[1] == logincode[0] && receivedpacket[2] == logincode[1] && receivedpacket[3] == logincode[2])
+                {
+                    currentLevel = Convert.ToInt32(Encoding.ASCII.GetString(receivedpacket, 4, 1));
+                    Console.WriteLine("Level received");
+                    SetControlPropertyThreadSafe(currentForm.label2, "Text", "L  E  V  E  L:  " + currentLevel.ToString());
+                    SetControlPropertyThreadSafe(currentForm.inv_level, "Text", "Level: " + currentLevel.ToString());
+                    switch (currentLevel)
+                    {
+                        case 1: 
+                            SetControlPropertyThreadSafe(currentForm.level_plaque, "Image", Curry_Client.Properties.Resources.plaque1);
+                            break;
+                        case 2: 
+                            SetControlPropertyThreadSafe(currentForm.level_plaque, "Image", Curry_Client.Properties.Resources.plaque2);
+                            break;
+                        case 3: 
+                            SetControlPropertyThreadSafe(currentForm.level_plaque, "Image", Curry_Client.Properties.Resources.plaque3);
+                            break;
+                    }
+                }
+            }
+            else if (receivedpacket[0] == 4)
+            {
+                //MinXP transmission protocol
+                if (receivedpacket[1] == logincode[0] && receivedpacket[2] == logincode[1] && receivedpacket[3] == logincode[2])
+                {
+                    String res = Encoding.ASCII.GetString(receivedpacket);
+                    String[] items = res.Split('\0');
+                    int minXp = Convert.ToInt32(items[1]);
+                    Console.WriteLine("MinXP received");
+                    SetControlPropertyThreadSafe(currentForm.progressBar1, "Minimum", minXp);
+                    SetControlPropertyThreadSafe(currentForm.progressBar2, "Minimum", minXp);
+                }
+            }
+            else if (receivedpacket[0] == 5)
+            {
+                //Important: Request XP before getting the Maximum XP!
+                //MaxXP transmission protocol
+                if (receivedpacket[1] == logincode[0] && receivedpacket[2] == logincode[1] && receivedpacket[3] == logincode[2])
+                {
+                    String res = Encoding.ASCII.GetString(receivedpacket);
+                    String[] items = res.Split('\0');
+                    int maxXP = Convert.ToInt32(items[1]);
+                    int nextlvl = maxXP - currentXP;
+                    Console.WriteLine("MaxXP received");
+                    SetControlPropertyThreadSafe(currentForm.progressBar1, "Maximum", maxXP);
+                    SetControlPropertyThreadSafe(currentForm.progressBar2, "Maximum", maxXP);
+                    SetControlPropertyThreadSafe(currentForm.exp_nextlvl, "Text", "Next level in: " + nextlvl.ToString());
                 }
             }
             else if (receivedpacket[0] == 7)
             {
-                //Experience Point transmission protocol
+                //User Erase (logout) protocol
                 if (receivedpacket[1] == 1)
                 {
                     //Verified the server and the server accepted the packet

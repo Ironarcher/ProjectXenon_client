@@ -396,12 +396,12 @@ namespace Curry_Server
                             }
                             SendBytes(handler, userdeletepacket);
                         }
-                        else if (state.buffer[0] == 27)
+                        else if (state.buffer[0] == 3)
                         {
-                            //Superuser processing (return a boolean if the current user is a superuser)
+                            //Level transmission processing
                             byte[] userpacket = new byte[3];
                             byte[] payload = new byte[5];
-                            payload[0] = 23;
+                            payload[0] = 3;
                             userpacket[0] = state.buffer[1];
                             userpacket[1] = state.buffer[2];
                             userpacket[2] = state.buffer[3];
@@ -411,14 +411,69 @@ namespace Curry_Server
                             int id = 0;
                             if (userList.TryGetValue(userpacket, out id))
                             {
-                                if (User.getSuperUser(userList[userpacket]))
+                                int lvl = Settings.getLevel(User.getXP(id));
+                                if (lvl > 0 && lvl < 256)
                                 {
                                     payload[4] = 1;
                                 }
-                                else
-                                {
-                                    payload[4] = 0;
-                                }
+                            }
+                            else
+                            {
+                                payload[4] = 0;
+                            }
+                            SendBytes(handler, payload);
+                        }
+                        else if (state.buffer[0] == 4)
+                        {
+                            //MinXP transmission processing
+                            byte[] userpacket = new byte[3];
+                            byte[] payload = new byte[9];
+                            payload[0] = 4;
+                            userpacket[0] = state.buffer[1];
+                            userpacket[1] = state.buffer[2];
+                            userpacket[2] = state.buffer[3];
+                            payload[1] = userpacket[0];
+                            payload[2] = userpacket[1];
+                            payload[3] = userpacket[2];
+                            int id = 0;
+                            if (userList.TryGetValue(userpacket, out id))
+                            {
+                                int lvl = Settings.getLevel(User.getXP(id));
+                                byte[] fnl = Encoding.ASCII.GetBytes("\0");
+                                byte[] xp = Encoding.ASCII.GetBytes(Settings.getXp(lvl).ToString());
+                                fnl.CopyTo(payload, 4);
+                                xp.CopyTo(payload, 5);
+                                fnl.CopyTo(payload, xp.Length + 5);
+                                if (xp.Length > 3) Console.WriteLine("FATAL: Byte overflow error in packet type 4 processing! XP length too long!");
+                            }
+                            else
+                            {
+                                payload[4] = 0;
+                            }
+                            SendBytes(handler, payload);
+                        }
+                        else if (state.buffer[0] == 5)
+                        {
+                            //MaxXP transmission processing
+                            byte[] userpacket = new byte[3];
+                            byte[] payload = new byte[9];
+                            payload[0] = 5;
+                            userpacket[0] = state.buffer[1];
+                            userpacket[1] = state.buffer[2];
+                            userpacket[2] = state.buffer[3];
+                            payload[1] = userpacket[0];
+                            payload[2] = userpacket[1];
+                            payload[3] = userpacket[2];
+                            int id = 0;
+                            if (userList.TryGetValue(userpacket, out id))
+                            {
+                                int lvl = Settings.getLevel(User.getXP(id))+1;
+                                byte[] fnl = Encoding.ASCII.GetBytes("\0");
+                                byte[] xp = Encoding.ASCII.GetBytes(Settings.getXp(lvl).ToString());
+                                fnl.CopyTo(payload, 4);
+                                xp.CopyTo(payload, 5);
+                                fnl.CopyTo(payload, xp.Length + 5);
+                                if (xp.Length > 3) Console.WriteLine("FATAL: Byte overflow error in packet type 5 processing! XP length too long!");
                             }
                             else
                             {
@@ -627,6 +682,21 @@ namespace Curry_Server
             XmlNodeList xnList = doc.SelectNodes("/generalsettings");
             XmlNode xn = xnList[0];
             return xn["getMultipler"].InnerText;
+        }
+        public static int getLevel(int xp)
+        {
+            int a = Convert.ToInt32(getMultipler()) / 2;
+            int b = Convert.ToInt32(getFirstLevelXp()) - a;
+            int c = -xp;
+            double sqrtpart = b * b - 4 * a * c;
+            double x = (-b + System.Math.Sqrt(sqrtpart)) / (2 * a);
+            return Convert.ToInt32(Math.Floor(x));
+        }
+        public static int getXp(int level)
+        {
+            int multipler = Convert.ToInt32(getMultipler());
+            int startlevelxp = Convert.ToInt32(getFirstLevelXp());
+            return ((multipler / 2) * level * level) + ((startlevelxp - (multipler / 2))*level);
         }
     }
 
