@@ -12,9 +12,16 @@ namespace Curry_Client
 {
     public partial class FormMission : Form
     {
+        private FormSuperUser mainForm;
         EnumMission missiontype = EnumMission.MultipleChoice;
         public FormMission()
         {
+            InitializeComponent();
+        }
+
+        public FormMission(FormSuperUser callingForm)
+        {
+            mainForm = callingForm as FormSuperUser; 
             InitializeComponent();
         }
 
@@ -180,13 +187,6 @@ namespace Curry_Client
             } 
         }
 
-        private void numericUpDown1_ValueChanged(object sender, EventArgs e)
-        {
-
-        }
-
-
-
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
             if (checkBox1.Checked == false)
@@ -282,7 +282,12 @@ namespace Curry_Client
 
         private void buttonFinish_Click(object sender, EventArgs e)
         {
-
+            //Send to the Mission Detail form
+            Mission createdMission = new Mission(missiontype);
+            createdMission.questions = questionList.ToArray();
+            MissionDetail mdform = new MissionDetail(mainForm, createdMission);
+            mdform.ShowDialog();
+            this.Close();
         }
     }
 }

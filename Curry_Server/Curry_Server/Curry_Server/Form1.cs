@@ -481,6 +481,95 @@ namespace Curry_Server
                             }
                             SendBytes(handler, payload);
                         }
+                        else if (state.buffer[0] == 23)
+                        {
+                            //Gold transmision processing
+                            byte[] userpacket = new byte[3];
+                            byte[] payload = new byte[9];
+                            payload[0] = 23;
+                            userpacket[0] = state.buffer[1];
+                            userpacket[1] = state.buffer[2];
+                            userpacket[2] = state.buffer[3];
+                            payload[1] = userpacket[0];
+                            payload[2] = userpacket[1];
+                            payload[3] = userpacket[2];
+                            int id = 0;
+                            if (userList.TryGetValue(userpacket, out id))
+                            {
+                                int gold = User.getGold(id);
+                                byte[] fnl = Encoding.ASCII.GetBytes("\0");
+                                byte[] goldpacket = Encoding.ASCII.GetBytes(gold.ToString());
+                                fnl.CopyTo(payload, 4);
+                                goldpacket.CopyTo(payload, 5);
+                                fnl.CopyTo(payload, goldpacket.Length + 5);
+                                if (goldpacket.Length > 3) Console.WriteLine("FATAL: Byte overflow error in packet type 5 processing! Gold length too long!");
+                            }
+                            else
+                            {
+                                payload[4] = 0;
+                            }
+                            SendBytes(handler, payload);
+                        }
+                        else if (state.buffer[0] == 24)
+                        {
+                            //Mana transmission processing
+                            byte[] userpacket = new byte[3];
+                            byte[] payload = new byte[9];
+                            payload[0] = 24;
+                            userpacket[0] = state.buffer[1];
+                            userpacket[1] = state.buffer[2];
+                            userpacket[2] = state.buffer[3];
+                            payload[1] = userpacket[0];
+                            payload[2] = userpacket[1];
+                            payload[3] = userpacket[2];
+                            int id = 0;
+                            if (userList.TryGetValue(userpacket, out id))
+                            {
+                                int mana = User.getMana(id);
+                                byte[] fnl = Encoding.ASCII.GetBytes("\0");
+                                byte[] manapacket = Encoding.ASCII.GetBytes(mana.ToString());
+                                fnl.CopyTo(payload, 4);
+                                manapacket.CopyTo(payload, 5);
+                                fnl.CopyTo(payload, manapacket.Length + 5);
+                                if (manapacket.Length > 3) Console.WriteLine("FATAL: Byte overflow error in packet type 5 processing! Mana length too long!");
+                            }
+                            else
+                            {
+                                payload[4] = 0;
+                            }
+                            SendBytes(handler, payload);
+                        }
+                        else if (state.buffer[0] == 29)
+                        {
+                            //Request for list of users
+                            byte[] userpacket = new byte[3];
+                            byte[] finalpacket = new byte[1024 + 5];
+                            finalpacket[0] = 29;
+                            userpacket[0] = state.buffer[1];
+                            userpacket[1] = state.buffer[2];
+                            userpacket[2] = state.buffer[3];
+                            int id = 0;
+                            if (userList.TryGetValue(userpacket, out id))
+                            {
+                                finalpacket[1] = userpacket[0];
+                                finalpacket[2] = userpacket[1];
+                                finalpacket[3] = userpacket[2];
+                                byte[] fnl = Encoding.ASCII.GetBytes("\0");
+                                fnl.CopyTo(finalpacket, 4);
+
+                                byte[] users = User.getUserList();
+                                users.CopyTo(finalpacket, 5);
+                            }
+                            else
+                            {
+                                Console.WriteLine("Failure");
+                                finalpacket[1] = 0; //Indicates failure
+                                finalpacket[2] = 0;
+                                finalpacket[3] = 0;
+                                finalpacket[4] = 0;
+                            }
+                            SendBytes(handler, finalpacket);
+                        }
 
 
                         // All the data has been read from the 
@@ -653,471 +742,6 @@ namespace Curry_Server
         {
             get { return userList;}
             set { userList = value;}
-        }
-    }
-
-    public class Settings
-    {
-        public static String userXML = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "//TeachPlay//Server//serversettubgs.xml";
-        public static String getFirstLevelXp()
-        {
-            XmlDocument doc = new XmlDocument();
-            doc.Load(userXML);
-            XmlNodeList xnList = doc.SelectNodes("/generalsettings");
-            XmlNode xn = xnList[0];
-            return xn["firstlevelxp"].InnerText;
-        }
-        public static String getLevelCap()
-        {
-            XmlDocument doc = new XmlDocument();
-            doc.Load(userXML);
-            XmlNodeList xnList = doc.SelectNodes("/generalsettings");
-            XmlNode xn = xnList[0];
-            return xn["levelcap"].InnerText;
-        }
-        public static String getMultipler()
-        {
-            XmlDocument doc = new XmlDocument();
-            doc.Load(userXML);
-            XmlNodeList xnList = doc.SelectNodes("/generalsettings");
-            XmlNode xn = xnList[0];
-            return xn["getMultipler"].InnerText;
-        }
-        public static int getLevel(int xp)
-        {
-            int a = Convert.ToInt32(getMultipler()) / 2;
-            int b = Convert.ToInt32(getFirstLevelXp()) - a;
-            int c = -xp;
-            double sqrtpart = b * b - 4 * a * c;
-            double x = (-b + System.Math.Sqrt(sqrtpart)) / (2 * a);
-            return Convert.ToInt32(Math.Floor(x));
-        }
-        public static int getXp(int level)
-        {
-            int multipler = Convert.ToInt32(getMultipler());
-            int startlevelxp = Convert.ToInt32(getFirstLevelXp());
-            return ((multipler / 2) * level * level) + ((startlevelxp - (multipler / 2))*level);
-        }
-    }
-
-    public class User {
-        /*
-         * getFirstName(id) returns the first name of user with id "id"
-         * getLastName, getPassword, getSuperUser are the same
-         * getInfo(id) returns a string array where [0] is firstname, [1] is lastname, [2] is password
-         * setFirstName(id, name) sets the first name of user with id "id" to "name"
-         * setLastName, setPassword, setSuperUser are the same
-         * Example: User.setLastName(1, "Kovesdy"); sets user id 1's last name to Kovesdy
-         * 
-         * createUser(firstname, lastname, password, superuser)
-         * creates a user with newest available id with the given info
-         */
-        public static String userXML = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "//TeachPlay//Server//users.xml";
-        public static String getFirstName(int id)
-        {
-            XmlDocument doc = new XmlDocument();
-            doc.Load(userXML);
-            XmlNodeList elemList = doc.GetElementsByTagName("user");
-            for (int i = 0; i < elemList.Count; i++)
-            {
-                XmlNode x = elemList.Item(i);
-                if (x.NodeType == XmlNodeType.Element)
-                {
-                    XmlElement e = (XmlElement)x;
-                    int tid = Int32.Parse(e.GetAttribute("id"));
-                    if (id == tid)
-                    {
-                        return e.ChildNodes.Item(0).FirstChild.Value;
-                    }
-                }
-            }
-            return "";
-        }
-        public static String getLastName(int id)
-        {
-            XmlDocument doc = new XmlDocument();
-            doc.Load(userXML);
-            XmlNodeList elemList = doc.GetElementsByTagName("user");
-            for (int i = 0; i < elemList.Count; i++)
-            {
-                XmlNode x = elemList.Item(i);
-                if (x.NodeType == XmlNodeType.Element)
-                {
-                    XmlElement e = (XmlElement)x;
-                    int tid = Int32.Parse(e.GetAttribute("id"));
-                    if (id == tid)
-                    {
-                        return e.ChildNodes.Item(1).FirstChild.Value;
-                    }
-                }
-            }
-            return "";
-        }
-        public static String getPassword(int id)
-        {
-            XmlDocument doc = new XmlDocument();
-            doc.Load(userXML);
-            XmlNodeList elemList = doc.GetElementsByTagName("user");
-            for (int i = 0; i < elemList.Count; i++)
-            {
-                XmlNode x = elemList.Item(i);
-                if (x.NodeType == XmlNodeType.Element)
-                {
-                    XmlElement e = (XmlElement)x;
-                    int tid = Int32.Parse(e.GetAttribute("id"));
-                    if (id == tid)
-                    {
-                        return e.ChildNodes.Item(2).FirstChild.Value;
-                    }
-                }
-            }
-            return "";
-        }
-        public static int getGold(int id)
-        {
-            XmlDocument doc = new XmlDocument();
-            doc.Load(userXML);
-            XmlNodeList elemList = doc.GetElementsByTagName("user");
-            for (int i = 0; i < elemList.Count; i++)
-            {
-                XmlNode x = elemList.Item(i);
-                if (x.NodeType == XmlNodeType.Element)
-                {
-                    XmlElement e = (XmlElement)x;
-                    int tid = Int32.Parse(e.GetAttribute("id"));
-                    if (id == tid)
-                    {
-                        return Convert.ToInt32(e.ChildNodes.Item(4).FirstChild.Value);
-                    }
-                }
-            }
-            return 0;
-        }
-        public static int getMana(int id)
-        {
-            XmlDocument doc = new XmlDocument();
-            doc.Load(userXML);
-            XmlNodeList elemList = doc.GetElementsByTagName("user");
-            for (int i = 0; i < elemList.Count; i++)
-            {
-                XmlNode x = elemList.Item(i);
-                if (x.NodeType == XmlNodeType.Element)
-                {
-                    XmlElement e = (XmlElement)x;
-                    int tid = Int32.Parse(e.GetAttribute("id"));
-                    if (id == tid)
-                    {
-                        return Convert.ToInt32(e.ChildNodes.Item(5).FirstChild.Value);
-                    }
-                }
-            }
-            return 0;
-        }
-        public static int getXP(int id)
-        {
-            XmlDocument doc = new XmlDocument();
-            doc.Load(userXML);
-            XmlNodeList elemList = doc.GetElementsByTagName("user");
-            for (int i = 0; i < elemList.Count; i++)
-            {
-                XmlNode x = elemList.Item(i);
-                if (x.NodeType == XmlNodeType.Element)
-                {
-                    XmlElement e = (XmlElement)x;
-                    int tid = Int32.Parse(e.GetAttribute("id"));
-                    if (id == tid)
-                    {
-                        return Convert.ToInt32(e.ChildNodes.Item(6).FirstChild.Value);
-                    }
-                }
-            }
-            return 0;
-        }
-        public static int createUser(String firstname, String lastname, String password, bool superuser)
-        {
-            XmlDocument doc = new XmlDocument();
-            doc.Load(userXML);
-            XmlNodeList elemList = doc.GetElementsByTagName("user");
-            int newid = elemList.Count+1;           
-            XmlElement e = doc.CreateElement("user");
-            XmlAttribute a = doc.CreateAttribute("id");
-            a.Value = newid.ToString();
-            e.Attributes.Append(a);
-            XmlElement fchild = doc.CreateElement("firstname");
-            fchild.AppendChild(doc.CreateTextNode(firstname));
-            XmlElement lchild = doc.CreateElement("lastname");
-            lchild.AppendChild(doc.CreateTextNode(lastname));
-            XmlElement pchild = doc.CreateElement("password");
-            pchild.AppendChild(doc.CreateTextNode(password));
-            XmlElement schild = doc.CreateElement("superuser");
-            schild.AppendChild(doc.CreateTextNode(superuser.ToString()));
-            XmlElement goldchild = doc.CreateElement("gold");
-            schild.AppendChild(doc.CreateTextNode(Convert.ToString(0)));
-            XmlElement manachild = doc.CreateElement("mana");
-            schild.AppendChild(doc.CreateTextNode(Convert.ToString(100)));
-            XmlElement xpchild = doc.CreateElement("xp");
-            schild.AppendChild(doc.CreateTextNode(Convert.ToString(0)));
-            XmlElement groupchild = doc.CreateElement("group");
-            schild.AppendChild(doc.CreateTextNode("None"));
-            XmlElement avatarchild = doc.CreateElement("avatar");
-            schild.AppendChild(doc.CreateTextNode("None"));
-            XmlElement emailchild = doc.CreateElement("email");
-            schild.AppendChild(doc.CreateTextNode("None"));
-            e.AppendChild(fchild);
-            e.AppendChild(lchild);
-            e.AppendChild(pchild);
-            e.AppendChild(schild);
-            e.AppendChild(goldchild);
-            e.AppendChild(manachild);
-            e.AppendChild(xpchild);
-            e.AppendChild(groupchild);
-            e.AppendChild(avatarchild);
-            e.AppendChild(emailchild);
-            doc.ChildNodes.Item(1).AppendChild(e);
-            doc.Save(userXML);
-            //doc.FirstChild.AppendChild
-            return newid;
-        }
-        public static String[] getInfo(int id) //[0] is fisrtname, [1] is lastname, [2] is password
-        {
-            XmlDocument doc = new XmlDocument();
-            doc.Load(userXML);
-            XmlNodeList elemList = doc.GetElementsByTagName("user");
-            for (int i = 0; i < elemList.Count; i++)
-            {
-                XmlNode x = elemList.Item(i);
-                if (x.NodeType == XmlNodeType.Element)
-                {
-                    XmlElement e = (XmlElement)x;
-                    int tid = Int32.Parse(e.GetAttribute("id"));
-                    if (id == tid)
-                    {
-                        return new String[] {e.ChildNodes.Item(0).FirstChild.Value, e.ChildNodes.Item(1).FirstChild.Value, e.ChildNodes.Item(2).FirstChild.Value};
-                    }
-                }
-            }
-            return null;
-        }
-        public static bool getSuperUser(int id)
-        {
-            XmlDocument doc = new XmlDocument();
-            doc.Load(userXML);
-            XmlNodeList elemList = doc.GetElementsByTagName("user");
-            for (int i = 0; i < elemList.Count; i++)
-            {
-                XmlNode x = elemList.Item(i);
-                if (x.NodeType == XmlNodeType.Element)
-                {
-                    XmlElement e = (XmlElement)x;
-                    int tid = Int32.Parse(e.GetAttribute("id"));
-                    if (id == tid)
-                    {
-                        return e.ChildNodes.Item(3).FirstChild.Value == "True";
-                    }
-                }
-            }
-            return false;
-        }
-
-        public static void setFirstName(int id, String value)
-        {
-            XmlDocument doc = new XmlDocument();
-            doc.Load(userXML);
-            XmlNodeList elemList = doc.GetElementsByTagName("user");
-            for (int i = 0; i < elemList.Count; i++)
-            {
-                XmlNode x = elemList.Item(i);
-                if (x.NodeType == XmlNodeType.Element)
-                {
-                    XmlElement e = (XmlElement)x;
-                    int tid = Int32.Parse(e.GetAttribute("id"));
-                    if (id == tid)
-                    {
-                        e.ChildNodes.Item(0).FirstChild.Value = value;
-                    }
-                }
-            }
-            doc.Save(userXML);
-        }
-        public static void setLastName(int id, String value)
-        {
-            XmlDocument doc = new XmlDocument();
-            doc.Load(userXML);
-            XmlNodeList elemList = doc.GetElementsByTagName("user");
-            for (int i = 0; i < elemList.Count; i++)
-            {
-                XmlNode x = elemList.Item(i);
-                if (x.NodeType == XmlNodeType.Element)
-                {
-                    XmlElement e = (XmlElement)x;
-                    int tid = Int32.Parse(e.GetAttribute("id"));
-                    if (id == tid)
-                    {
-                        e.ChildNodes.Item(1).FirstChild.Value = value;
-                    }
-                }
-            }
-            doc.Save(userXML);
-        }
-        public static void setPassword(int id, String value)
-        {
-            XmlDocument doc = new XmlDocument();
-            doc.Load(userXML);
-            XmlNodeList elemList = doc.GetElementsByTagName("user");
-            for (int i = 0; i < elemList.Count; i++)
-            {
-                XmlNode x = elemList.Item(i);
-                if (x.NodeType == XmlNodeType.Element)
-                {
-                    XmlElement e = (XmlElement)x;
-                    int tid = Int32.Parse(e.GetAttribute("id"));
-                    if (id == tid)
-                    {
-                        e.ChildNodes.Item(2).FirstChild.Value = value;
-                    }
-                }
-            }
-            doc.Save(userXML);
-        }
-        public static void setSuperUser(int id, bool value)
-        {
-            XmlDocument doc = new XmlDocument();
-            doc.Load(userXML);
-            XmlNodeList elemList = doc.GetElementsByTagName("user");
-            for (int i = 0; i < elemList.Count; i++)
-            {
-                XmlNode x = elemList.Item(i);
-                if (x.NodeType == XmlNodeType.Element)
-                {
-                    XmlElement e = (XmlElement)x;
-                    int tid = Int32.Parse(e.GetAttribute("id"));
-                    if (id == tid)
-                    {
-                        if (value == true)
-                        {
-                            Console.WriteLine("SUperuser working");
-                            e.ChildNodes.Item(3).FirstChild.Value = "True";
-                        } else{
-                            e.ChildNodes.Item(3).FirstChild.Value = "False";
-                        }
-                    }
-                }
-            }
-            doc.Save(userXML);
-        }
-        public static void setGold(int id, int value)
-        {
-            XmlDocument doc = new XmlDocument();
-            doc.Load(userXML);
-            XmlNodeList elemList = doc.GetElementsByTagName("user");
-            for (int i = 0; i < elemList.Count; i++)
-            {
-                XmlNode x = elemList.Item(i);
-                if (x.NodeType == XmlNodeType.Element)
-                {
-                    XmlElement e = (XmlElement)x;
-                    int tid = Int32.Parse(e.GetAttribute("id"));
-                    if (id == tid)
-                    {
-                        e.ChildNodes.Item(4).FirstChild.Value = value.ToString();
-                    }
-                }
-            }
-            doc.Save(userXML);
-        }
-        public static void setMana(int id, int value)
-        {
-            XmlDocument doc = new XmlDocument();
-            doc.Load(userXML);
-            XmlNodeList elemList = doc.GetElementsByTagName("user");
-            for (int i = 0; i < elemList.Count; i++)
-            {
-                XmlNode x = elemList.Item(i);
-                if (x.NodeType == XmlNodeType.Element)
-                {
-                    XmlElement e = (XmlElement)x;
-                    int tid = Int32.Parse(e.GetAttribute("id"));
-                    if (id == tid)
-                    {
-                        e.ChildNodes.Item(5).FirstChild.Value = value.ToString();
-                    }
-                }
-            }
-            doc.Save(userXML);
-        }
-        public static void setXP(int id, int value)
-        {
-            XmlDocument doc = new XmlDocument();
-            doc.Load(userXML);
-            XmlNodeList elemList = doc.GetElementsByTagName("user");
-            for (int i = 0; i < elemList.Count; i++)
-            {
-                XmlNode x = elemList.Item(i);
-                if (x.NodeType == XmlNodeType.Element)
-                {
-                    XmlElement e = (XmlElement)x;
-                    int tid = Int32.Parse(e.GetAttribute("id"));
-                    if (id == tid)
-                    {
-                        e.ChildNodes.Item(6).FirstChild.Value = value.ToString();
-                    }
-                }
-            }
-            doc.Save(userXML);
-        }
-        public static int getID(String firstname, String lastname)
-        {
-            XmlDocument doc = new XmlDocument();
-            doc.Load(userXML);
-            XmlNodeList elemList = doc.GetElementsByTagName("user");
-            for (int i = 0; i < elemList.Count; i++)
-            {
-                XmlNode x = elemList.Item(i);
-                if (x.NodeType == XmlNodeType.Element)
-                {
-                    XmlElement e = (XmlElement)x;
-                    int tid = Int32.Parse(e.GetAttribute("id"));
-                    if (e.ChildNodes.Item(0).FirstChild.Value == firstname && e.ChildNodes.Item(1).FirstChild.Value == lastname)
-                    {
-                        return tid;
-                    }
-                }
-            }
-            return 0;
-        }
-    }
-
-    public class ByteArrayComparer : IEqualityComparer<byte[]>
-    {
-        public bool Equals(byte[] left, byte[] right)
-        {
-            if (left == null || right == null)
-            {
-                return left == right;
-            }
-            if (left.Length != right.Length)
-            {
-                return false;
-            }
-            for (int i = 0; i < left.Length; i++)
-            {
-                if (left[i] != right[i])
-                {
-                    return false;
-                }
-            }
-            return true;
-        }
-        public int GetHashCode(byte[] key)
-        {
-            if (key == null)
-                throw new ArgumentNullException("key");
-            int sum = 0;
-            foreach (byte cur in key)
-            {
-                sum += cur;
-            }
-            return sum;
         }
     }
 }

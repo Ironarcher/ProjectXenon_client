@@ -56,10 +56,13 @@ namespace Curry_Client
     class Mission
     {
         public int xpreward = 0;
+        public int goldreward = 0;
         public Mission(EnumMission mtype)
         {
             this.type = mtype;
         }
+        public DateTime missionStart, missionEnd;
+        public int lvlStartEligible, lvlEndEligible;
         public EnumMission type;
         public String title;
         public Question[] questions;

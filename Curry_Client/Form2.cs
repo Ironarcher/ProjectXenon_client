@@ -61,6 +61,8 @@ namespace Curry_Client
             this.mainForm.requestXP();
             this.mainForm.requestMinXP();
             this.mainForm.requestMaxXP();
+            this.mainForm.getGold();
+            this.mainForm.getMana();
             //this.mainForm.serverIP = masterServerList[comboBox1.SelectedItem.ToString()];
         }
 

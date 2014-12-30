@@ -168,12 +168,12 @@ namespace Curry_Client
             requestData(22);
         }
 
-        private void getGold()
+        public void getGold()
         {
             requestData(23);
         }
 
-        private void getMana()
+        public void getMana()
         {
             requestData(24);
         }
@@ -301,7 +301,6 @@ namespace Curry_Client
             }
             else if (receivedpacket[0] == 3)
             {
-                Console.WriteLine("TRYING");
                 //Level transmission protocol
                 if (receivedpacket[1] == logincode[0] && receivedpacket[2] == logincode[1] && receivedpacket[3] == logincode[2])
                 {
@@ -359,6 +358,30 @@ namespace Curry_Client
                 {
                     //Verified the server and the server accepted the packet
                     Console.WriteLine("Verification Code Erased from Server");
+                }
+            }
+            else if (receivedpacket[0] == 23)
+            {
+                //Get Gold
+                if (receivedpacket[1] == logincode[0] && receivedpacket[2] == logincode[1] && receivedpacket[3] == logincode[2])
+                {
+                    String res = Encoding.ASCII.GetString(receivedpacket);
+                    String[] items = res.Split('\0');
+                    int gold = Convert.ToInt32(items[1]);
+                    Console.WriteLine("Gold received");
+                    SetControlPropertyThreadSafe(currentForm.gold, "Text", gold.ToString());
+                }
+            }
+            else if (receivedpacket[0] == 24)
+            {
+                //Get Mana
+                if (receivedpacket[1] == logincode[0] && receivedpacket[2] == logincode[1] && receivedpacket[3] == logincode[2])
+                {
+                    String res = Encoding.ASCII.GetString(receivedpacket);
+                    String[] items = res.Split('\0');
+                    int mana = Convert.ToInt32(items[1]);
+                    Console.WriteLine("Mana received");
+                    SetControlPropertyThreadSafe(currentForm.manacount, "Text", mana.ToString());
                 }
             }
         }

@@ -12,6 +12,8 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Text;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.IO;
 
 
 namespace Curry_Client
@@ -20,6 +22,7 @@ namespace Curry_Client
     {
         private static byte[] receivedpacket;
         private static byte[] logincode;
+        private static List<User> userList;
         private const int port = 32320;
         private String ServerIP = "127.0.0.1";
         private static String response = String.Empty;
@@ -56,6 +59,77 @@ namespace Curry_Client
 
         }
 
+        private void getUserList()
+        {
+            byte[] packet = new byte[9];
+            packet[0] = 29;
+            packet[1] = logincode[0];
+            packet[2] = logincode[1];
+            packet[3] = logincode[2];
+            byte[] temp = Encoding.ASCII.GetBytes("<EOF>");
+            temp.CopyTo(packet, 4);
+            connect(ServerIP, packet);
+        }
+
+        private void getGroupList()
+        {
+            byte[] packet = new byte[9];
+            packet[0] = 32;
+            packet[1] = logincode[0];
+            packet[2] = logincode[1];
+            packet[3] = logincode[2];
+            byte[] temp = Encoding.ASCII.GetBytes("<EOF>");
+            temp.CopyTo(packet, 4);
+            connect(ServerIP, packet);
+        }
+
+        private void getUserGroup()
+        {
+            //Code is 31
+        }
+
+        private void addUserToGroup(int userID, String group)
+        {
+            byte[] packet = new byte[10];
+            //packet type 2 is an XP request/transmission protocol
+            //packet bytes 2-5 are authorization bytes
+            packet[0] = 11;
+            byte[] ae = Encoding.ASCII.GetBytes(userID.ToString());
+            ae.CopyTo(packet, 1);
+            int te = Encoding.ASCII.GetByteCount(userID.ToString());
+            byte[] fnl = Encoding.ASCII.GetBytes("\0");
+            fnl.CopyTo(packet, te + 1);
+            te += 1;
+            packet[1 + te] = logincode[0];
+            packet[2 + te] = logincode[1];
+            packet[3 + te] = logincode[2];
+            Console.WriteLine("Verification code: " + Convert.ToInt32(logincode[0]) + Convert.ToInt32(logincode[1]) + Convert.ToInt32(logincode[2]));
+            byte[] temp = Encoding.ASCII.GetBytes("<EOF>");
+            temp.CopyTo(packet, 4 + te);
+            connect(ServerIP, packet);
+        }
+
+        private void deleteUserFromGroup(int userID, String group)
+        {
+            byte[] packet = new byte[10];
+            //packet type 2 is an XP request/transmission protocol
+            //packet bytes 2-5 are authorization bytes
+            packet[0] = 12;
+            byte[] ae = Encoding.ASCII.GetBytes(userID.ToString());
+            ae.CopyTo(packet, 1);
+            int te = Encoding.ASCII.GetByteCount(userID.ToString());
+            byte[] fnl = Encoding.ASCII.GetBytes("\0");
+            fnl.CopyTo(packet, te + 1);
+            te += 1;
+            packet[1 + te] = logincode[0];
+            packet[2 + te] = logincode[1];
+            packet[3 + te] = logincode[2];
+            Console.WriteLine("Verification code: " + Convert.ToInt32(logincode[0]) + Convert.ToInt32(logincode[1]) + Convert.ToInt32(logincode[2]));
+            byte[] temp = Encoding.ASCII.GetBytes("<EOF>");
+            temp.CopyTo(packet, 4 + te);
+            connect(ServerIP, packet);
+        }
+
         private void sendStringPacket(int userID)
         {
             byte[] packet = new byte[10];
@@ -74,6 +148,20 @@ namespace Curry_Client
             Console.WriteLine("Verification code: " + Convert.ToInt32(logincode[0]) + Convert.ToInt32(logincode[1]) + Convert.ToInt32(logincode[2]));
             byte[] temp = Encoding.ASCII.GetBytes("<EOF>");
             temp.CopyTo(packet, 4+te);
+            connect(ServerIP, packet);
+        }
+
+        private void createMission(Mission mission)
+        {
+            byte[] missionpacket = ObjectToByteArray(mission);
+            byte[] packet = new byte[9 + missionpacket.Length];
+            packet[0] = 13;
+            packet[1] = logincode[0];
+            packet[2] = logincode[1];
+            packet[3] = logincode[2];
+            missionpacket.CopyTo(packet, 4);
+            byte[] temp = Encoding.ASCII.GetBytes("<EOF>");
+            temp.CopyTo(packet, 4 + missionpacket.Length);
             connect(ServerIP, packet);
         }
 
@@ -225,7 +313,7 @@ namespace Curry_Client
                                 //CHANGE NUMBER OF STRINGS TO END WITH
                                 String[] finalresult = new String[2];
                                 Console.WriteLine("SUCCESS");
-                                for(int f = 0; f<3; f++)
+                                for (int f = 0; f < 3; f++)
                                 {
                                     String s = items[f + 1];
                                     if (s != "<EOF>")
@@ -239,6 +327,20 @@ namespace Curry_Client
                                 }
                                 Console.WriteLine(items[1]);
                             }
+                        }
+                        else if (receivedpacket[0] == 29 && receivedpacket[1] == logincode[0] && receivedpacket[2] == logincode[1] && receivedpacket[3] == logincode[2])
+                        {
+                            Console.WriteLine("HERE");
+                            String payload = Encoding.ASCII.GetString(receivedpacket);
+                            String[] payloadarr = payload.Split('\0');
+                            userList.Clear();
+                            //Odds are first names and Evens are last names (except for the 0 value which is thrown away)
+                            for (int i = 1; i <= payloadarr.Length; i+=2)
+                            {
+                                userList.Add(new User(payloadarr[i], payloadarr[i + 1]));
+                            }
+
+                            Console.WriteLine("Size of user list: " + userList.Count);
                         }
                     }
                     // Signal that all bytes have been received.
@@ -442,16 +544,55 @@ namespace Curry_Client
 
         private void button6_Click(object sender, EventArgs e)
         {
-            //sendStringPacket();
+            getUserList();
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private byte[] ObjectToByteArray(Object obj)
+        {
+            if (obj == null)
+                return null;
+            BinaryFormatter bf = new BinaryFormatter();
+            using (MemoryStream ms = new MemoryStream())
+            {
+                bf.Serialize(ms, obj);
+                return ms.ToArray();
+            }
+        }
+
+        private Object ByteArrayToObject(byte[] arrBytes)
+        {
+            MemoryStream memStream = new MemoryStream();
+            BinaryFormatter binForm = new BinaryFormatter();
+            memStream.Write(arrBytes, 0, arrBytes.Length);
+            memStream.Seek(0, SeekOrigin.Begin);
+            Object obj = (Object)binForm.Deserialize(memStream);
+            return obj;
         }
     }
+    
     public class Group
     {
-        public string name;
+        public String name;
         public List<int> users = new List<int>();
         public Group(string n)
         {
             name = n;
         }
+    }
+
+    public class User
+    {
+        public User(String firstname, String lastname)
+        {
+            this.firstname = firstname;
+            this.lastname = lastname;
+        }
+        public String firstname, lastname;
+        public Group group;
     }
 }
