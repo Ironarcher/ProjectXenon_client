@@ -114,6 +114,33 @@ namespace Curry_Server
             }
             return "";
         }
+        public static void addMission(int missionID)
+        {
+            XmlDocument doc = new XmlDocument();
+            doc.Load(userXML);
+            XmlNodeList elemList = doc.GetElementsByTagName("user");
+            for (int i = 0; i < elemList.Count; i++)
+            {
+                XmlNode x = elemList.Item(i);
+                if (x.NodeType == XmlNodeType.Element)
+                {
+                    XmlElement e = (XmlElement)x;
+                    XmlElement nodee = doc.CreateElement("mission");
+                    XmlAttribute nodea = doc.CreateAttribute("id");
+                    nodea.Value = missionID.ToString();
+                    nodee.Attributes.Append(nodea);
+
+                    XmlElement gradechild = doc.CreateElement("grade");
+                    gradechild.AppendChild(doc.CreateTextNode("N/A"));
+                    XmlElement attemptschild = doc.CreateElement("attempts");
+                    attemptschild.AppendChild(doc.CreateTextNode("0"));
+                    nodee.AppendChild(gradechild);
+                    nodee.AppendChild(attemptschild);
+
+                    e.AppendChild(nodee);
+                }
+            }
+        }
         public static int getGold(int id)
         {
             XmlDocument doc = new XmlDocument();

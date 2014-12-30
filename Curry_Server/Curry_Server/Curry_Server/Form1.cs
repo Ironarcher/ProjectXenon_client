@@ -11,6 +11,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Runtime.InteropServices;
 using System.Xml;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 
 namespace Curry_Server
@@ -127,7 +128,7 @@ namespace Curry_Server
         // Client  socket.
         public Socket workSocket = null;
         // Size of receive buffer.
-        public const int BufferSize = 1024;
+        public const int BufferSize = 2048;
         // Receive buffer.
         public byte[] buffer = new byte[BufferSize];
         // Received data string.
@@ -481,6 +482,33 @@ namespace Curry_Server
                             }
                             SendBytes(handler, payload);
                         }
+                        else if (state.buffer[0] == 13)
+                        {
+                            //Return positive that mission was successfully created
+                            byte[] userpacket = new byte[3];
+                            byte[] payload = new byte[5];
+                            payload[0] = 13;
+                            userpacket[0] = state.buffer[1];
+                            userpacket[1] = state.buffer[2];
+                            userpacket[2] = state.buffer[3];
+                            payload[1] = userpacket[0];
+                            payload[2] = userpacket[1];
+                            payload[3] = userpacket[2];
+                            int id = 0;
+                            if (userList.TryGetValue(userpacket, out id))
+                            {
+                                payload[4] = 1;
+                                byte[] missionpacket = new byte[state.buffer.Length - 9];
+                                Array.Copy(state.buffer, 4, missionpacket, 0, state.buffer.Length - 9);
+                                Mission mis = (Mission)ByteArrayToObject(missionpacket);
+                                Missions.createMission(mis);
+                            }
+                            else
+                            {
+                                payload[4] = 0;
+                            }
+                            SendBytes(handler, payload);
+                        }
                         else if (state.buffer[0] == 23)
                         {
                             //Gold transmision processing
@@ -627,6 +655,28 @@ namespace Curry_Server
             {
                 Console.WriteLine(e.ToString());
             }
+        }
+
+        public static byte[] ObjectToByteArray(Object obj)
+        {
+            if (obj == null)
+                return null;
+            BinaryFormatter bf = new BinaryFormatter();
+            using (MemoryStream ms = new MemoryStream())
+            {
+                bf.Serialize(ms, obj);
+                return ms.ToArray();
+            }
+        }
+
+        public static Object ByteArrayToObject(byte[] arrBytes)
+        {
+            MemoryStream memStream = new MemoryStream();
+            BinaryFormatter binForm = new BinaryFormatter();
+            memStream.Write(arrBytes, 0, arrBytes.Length);
+            memStream.Seek(0, SeekOrigin.Begin);
+            Object obj = (Object)binForm.Deserialize(memStream);
+            return obj;
         }
 
         public static int findUser(String firstname, String lastname, String password)
