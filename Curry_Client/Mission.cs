@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Curry_Client
 {
+    [Serializable]
     class Question
     {
         private String prompt;
@@ -53,6 +54,7 @@ namespace Curry_Client
             }
         }
     }
+    [Serializable]
     class Mission
     {
         public int xpreward = 0;

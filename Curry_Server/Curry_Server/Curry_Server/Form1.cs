@@ -482,6 +482,48 @@ namespace Curry_Server
                             }
                             SendBytes(handler, payload);
                         }
+                        else if (state.buffer[0] == 8)
+                        {
+                            //Modify password
+                            byte[] userpacket = new byte[3];
+                            byte[] payload = new byte[5];
+                            payload[0] = 8;
+                            userpacket[0] = state.buffer[1];
+                            userpacket[1] = state.buffer[2];
+                            userpacket[2] = state.buffer[3];
+                            payload[1] = userpacket[0];
+                            payload[2] = userpacket[1];
+                            payload[3] = userpacket[2];
+                            int id = 0;
+                            if (userList.TryGetValue(userpacket, out id))
+                            {
+                                Console.WriteLine("HERE");
+                                String[] items = content.Split('\0');
+                                //items[1] is the new password and items[2] is the old password
+                                Console.WriteLine(items[1]);
+                                Console.WriteLine(User.getPassword(id));
+                                Console.WriteLine(items[2]);
+                                if (items[2].Equals(User.getPassword(id)))
+                                {
+                                    Console.WriteLine("REACHED");
+                                    User.setPassword(id, items[1]);
+                                    payload[4] = 1;
+                                    //Indicates succcess
+                                }
+                                else
+                                {
+                                    //Indicates wrong old password entered
+                                    payload[4] = 2;
+                                }
+                            }
+                            else
+                            {
+                                //Means that could not verify user based on logincode authorization
+                                payload[4] = 0;
+                            }
+                            Console.WriteLine("HI");
+                            SendBytes(handler, payload);
+                        }
                         else if (state.buffer[0] == 13)
                         {
                             //Return positive that mission was successfully created
@@ -499,9 +541,17 @@ namespace Curry_Server
                             {
                                 payload[4] = 1;
                                 byte[] missionpacket = new byte[state.buffer.Length - 9];
-                                Array.Copy(state.buffer, 4, missionpacket, 0, state.buffer.Length - 9);
-                                Mission mis = (Mission)ByteArrayToObject(missionpacket);
-                                Missions.createMission(mis);
+                                try
+                                {
+                                    Array.Copy(state.buffer, 4, missionpacket, 0, state.buffer.Length - 9);
+                                    Object obj = ByteArrayToObject(missionpacket);
+                                    Mission mis = (Mission)obj;
+                                    Missions.createMission(mis);
+                                }
+                                catch (Exception f)
+                                {
+                                    Console.WriteLine(f.ToString());
+                                }
                             }
                             else
                             {
@@ -657,19 +707,17 @@ namespace Curry_Server
             }
         }
 
-        public static byte[] ObjectToByteArray(Object obj)
+        private static byte[] ObjectToByteArray(Object obj)
         {
             if (obj == null)
                 return null;
             BinaryFormatter bf = new BinaryFormatter();
-            using (MemoryStream ms = new MemoryStream())
-            {
-                bf.Serialize(ms, obj);
-                return ms.ToArray();
-            }
+            MemoryStream ms = new MemoryStream();
+            bf.Serialize(ms, obj);
+            return ms.ToArray();
         }
 
-        public static Object ByteArrayToObject(byte[] arrBytes)
+        private static Object ByteArrayToObject(byte[] arrBytes)
         {
             MemoryStream memStream = new MemoryStream();
             BinaryFormatter binForm = new BinaryFormatter();

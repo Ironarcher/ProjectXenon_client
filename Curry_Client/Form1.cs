@@ -108,6 +108,26 @@ namespace Curry_Client
             connect(ServerIP, packet);
         }
 
+        private void changePassword()
+        {
+            byte[] packet = new byte[60];
+            packet[0] = 8;
+            packet[1] = logincode[0];
+            packet[2] = logincode[1];
+            packet[3] = logincode[2];
+            byte[] fnl = Encoding.ASCII.GetBytes("\0");
+            fnl.CopyTo(packet, 4);
+            byte[] newpass = Encoding.ASCII.GetBytes(newpassword.Text);
+            newpass.CopyTo(packet, 5);
+            fnl.CopyTo(packet, newpass.Length + 5);
+            byte[] oldpassword = Encoding.ASCII.GetBytes(oldpassword1.Text);
+            oldpassword.CopyTo(packet, newpass.Length + 1 + 5);
+            fnl.CopyTo(packet, newpass.Length + oldpassword.Length + 1 + 5);
+            byte[] closing = Encoding.ASCII.GetBytes("<EOF>");
+            closing.CopyTo(packet, newpass.Length + oldpassword.Length + 2 + 5);
+            connect(ServerIP, packet);
+        }
+
         public void requestXP()
         {
             requestData(2);
@@ -360,6 +380,24 @@ namespace Curry_Client
                     Console.WriteLine("Verification Code Erased from Server");
                 }
             }
+            else if (receivedpacket[0] == 8)
+            {
+                //Password modification protocol
+                if (receivedpacket[4] != 0 && receivedpacket[1] == logincode[0] && receivedpacket[2] == logincode[1] && receivedpacket[3] == logincode[2])
+                {
+                    Console.WriteLine("Password change attempted: Received callback package");
+                    if (receivedpacket[4] == 1)
+                    {
+                        //Indicates success
+                        SetControlPropertyThreadSafe(currentForm.statuslabel_1, "Text", "Password changed successfully.");
+                    }
+                    else if (receivedpacket[4] == 2)
+                    {
+                        //Old password entered incorrectly
+                        SetControlPropertyThreadSafe(currentForm.statuslabel_1, "Text", "Old password entered incorrectly.");
+                    }
+                }
+            }
             else if (receivedpacket[0] == 23)
             {
                 //Get Gold
@@ -546,6 +584,17 @@ namespace Curry_Client
             {
                 control.GetType().InvokeMember(propertyName, BindingFlags.SetProperty, null, control, new object[] { propertyValue });
             }
+        }
+
+        private void settings_1_Click(object sender, EventArgs e)
+        {
+            changePassword();
+        }
+
+        private void setting_page_Leave(object sender, EventArgs e)
+        {
+            statuslabel_1.Text = "";
+            statuslabel_2.Text = "";
         }
     }
 }

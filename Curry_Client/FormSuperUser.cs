@@ -43,7 +43,7 @@ namespace Curry_Client
 
         private void button1_Click(object sender, EventArgs e)
         {
-            FormMission f = new FormMission();
+            FormMission f = new FormMission(this);
             f.Show();
         }
 
@@ -151,9 +151,10 @@ namespace Curry_Client
             connect(ServerIP, packet);
         }
 
-        private void createMission(Mission mission)
+        internal void createMission(Mission mission)
         {
-            byte[] missionpacket = ObjectToByteArray(mission);
+            Object obj = (Object)mission;
+            byte[] missionpacket = ObjectToByteArray(obj);
             byte[] packet = new byte[9 + missionpacket.Length];
             packet[0] = 13;
             packet[1] = logincode[0];
@@ -552,19 +553,17 @@ namespace Curry_Client
 
         }
 
-        private byte[] ObjectToByteArray(Object obj)
+        private static byte[] ObjectToByteArray(Object obj)
         {
             if (obj == null)
                 return null;
             BinaryFormatter bf = new BinaryFormatter();
-            using (MemoryStream ms = new MemoryStream())
-            {
-                bf.Serialize(ms, obj);
-                return ms.ToArray();
-            }
+            MemoryStream ms = new MemoryStream();
+            bf.Serialize(ms, obj);
+            return ms.ToArray();
         }
 
-        private Object ByteArrayToObject(byte[] arrBytes)
+        private static Object ByteArrayToObject(byte[] arrBytes)
         {
             MemoryStream memStream = new MemoryStream();
             BinaryFormatter binForm = new BinaryFormatter();

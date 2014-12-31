@@ -12,7 +12,7 @@ namespace Curry_Client
 {
     public partial class FormMission : Form
     {
-        private FormSuperUser mainForm;
+        internal FormSuperUser mainForm;
         EnumMission missiontype = EnumMission.MultipleChoice;
         public FormMission()
         {

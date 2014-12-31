@@ -124,6 +124,14 @@
             this.label8 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.setting_page = new System.Windows.Forms.TabPage();
+            this.groupBox8 = new System.Windows.Forms.GroupBox();
+            this.oldpassword2 = new System.Windows.Forms.TextBox();
+            this.newemail = new System.Windows.Forms.TextBox();
+            this.settings_2 = new System.Windows.Forms.Button();
+            this.groupBox7 = new System.Windows.Forms.GroupBox();
+            this.oldpassword1 = new System.Windows.Forms.TextBox();
+            this.newpassword = new System.Windows.Forms.TextBox();
+            this.settings_1 = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.userbox = new System.Windows.Forms.GroupBox();
             this.manacount = new System.Windows.Forms.Label();
@@ -140,6 +148,8 @@
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.oldMissionList = new System.Windows.Forms.ListBox();
             this.label7 = new System.Windows.Forms.Label();
+            this.statuslabel_1 = new System.Windows.Forms.Label();
+            this.statuslabel_2 = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.mission_page.SuspendLayout();
             this.groupBox5.SuspendLayout();
@@ -153,6 +163,9 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             this.leaderboard_page.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
+            this.setting_page.SuspendLayout();
+            this.groupBox8.SuspendLayout();
+            this.groupBox7.SuspendLayout();
             this.userbox.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -1303,12 +1316,96 @@
             // 
             // setting_page
             // 
+            this.setting_page.Controls.Add(this.groupBox8);
+            this.setting_page.Controls.Add(this.groupBox7);
             this.setting_page.Location = new System.Drawing.Point(4, 22);
             this.setting_page.Name = "setting_page";
             this.setting_page.Size = new System.Drawing.Size(528, 544);
             this.setting_page.TabIndex = 5;
             this.setting_page.Text = "Settings";
             this.setting_page.UseVisualStyleBackColor = true;
+            this.setting_page.Leave += new System.EventHandler(this.setting_page_Leave);
+            // 
+            // groupBox8
+            // 
+            this.groupBox8.Controls.Add(this.statuslabel_2);
+            this.groupBox8.Controls.Add(this.oldpassword2);
+            this.groupBox8.Controls.Add(this.newemail);
+            this.groupBox8.Controls.Add(this.settings_2);
+            this.groupBox8.Location = new System.Drawing.Point(12, 118);
+            this.groupBox8.Name = "groupBox8";
+            this.groupBox8.Size = new System.Drawing.Size(500, 100);
+            this.groupBox8.TabIndex = 4;
+            this.groupBox8.TabStop = false;
+            this.groupBox8.Text = "Change your email address";
+            // 
+            // oldpassword2
+            // 
+            this.oldpassword2.ForeColor = System.Drawing.SystemColors.InactiveCaption;
+            this.oldpassword2.Location = new System.Drawing.Point(6, 55);
+            this.oldpassword2.Name = "oldpassword2";
+            this.oldpassword2.Size = new System.Drawing.Size(254, 20);
+            this.oldpassword2.TabIndex = 2;
+            this.oldpassword2.Text = "Enter old password";
+            // 
+            // newemail
+            // 
+            this.newemail.ForeColor = System.Drawing.SystemColors.InactiveCaption;
+            this.newemail.Location = new System.Drawing.Point(6, 29);
+            this.newemail.Name = "newemail";
+            this.newemail.Size = new System.Drawing.Size(254, 20);
+            this.newemail.TabIndex = 1;
+            this.newemail.Text = "Enter new password";
+            // 
+            // settings_2
+            // 
+            this.settings_2.Location = new System.Drawing.Point(349, 41);
+            this.settings_2.Name = "settings_2";
+            this.settings_2.Size = new System.Drawing.Size(84, 23);
+            this.settings_2.TabIndex = 0;
+            this.settings_2.Text = "Verify";
+            this.settings_2.UseVisualStyleBackColor = true;
+            // 
+            // groupBox7
+            // 
+            this.groupBox7.Controls.Add(this.statuslabel_1);
+            this.groupBox7.Controls.Add(this.oldpassword1);
+            this.groupBox7.Controls.Add(this.newpassword);
+            this.groupBox7.Controls.Add(this.settings_1);
+            this.groupBox7.Location = new System.Drawing.Point(12, 12);
+            this.groupBox7.Name = "groupBox7";
+            this.groupBox7.Size = new System.Drawing.Size(500, 100);
+            this.groupBox7.TabIndex = 3;
+            this.groupBox7.TabStop = false;
+            this.groupBox7.Text = "Change your password";
+            // 
+            // oldpassword1
+            // 
+            this.oldpassword1.ForeColor = System.Drawing.SystemColors.InactiveCaption;
+            this.oldpassword1.Location = new System.Drawing.Point(6, 55);
+            this.oldpassword1.Name = "oldpassword1";
+            this.oldpassword1.Size = new System.Drawing.Size(254, 20);
+            this.oldpassword1.TabIndex = 2;
+            this.oldpassword1.Text = "Enter old password";
+            // 
+            // newpassword
+            // 
+            this.newpassword.ForeColor = System.Drawing.SystemColors.InactiveCaption;
+            this.newpassword.Location = new System.Drawing.Point(6, 29);
+            this.newpassword.Name = "newpassword";
+            this.newpassword.Size = new System.Drawing.Size(254, 20);
+            this.newpassword.TabIndex = 1;
+            this.newpassword.Text = "Enter new password";
+            // 
+            // settings_1
+            // 
+            this.settings_1.Location = new System.Drawing.Point(349, 41);
+            this.settings_1.Name = "settings_1";
+            this.settings_1.Size = new System.Drawing.Size(84, 23);
+            this.settings_1.TabIndex = 0;
+            this.settings_1.Text = "Verify";
+            this.settings_1.UseVisualStyleBackColor = true;
+            this.settings_1.Click += new System.EventHandler(this.settings_1_Click);
             // 
             // label1
             // 
@@ -1505,6 +1602,22 @@
             this.label7.TabIndex = 12;
             this.label7.Text = "contact";
             // 
+            // statuslabel_1
+            // 
+            this.statuslabel_1.AutoSize = true;
+            this.statuslabel_1.Location = new System.Drawing.Point(6, 79);
+            this.statuslabel_1.Name = "statuslabel_1";
+            this.statuslabel_1.Size = new System.Drawing.Size(0, 13);
+            this.statuslabel_1.TabIndex = 3;
+            // 
+            // statuslabel_2
+            // 
+            this.statuslabel_2.AutoSize = true;
+            this.statuslabel_2.Location = new System.Drawing.Point(6, 78);
+            this.statuslabel_2.Name = "statuslabel_2";
+            this.statuslabel_2.Size = new System.Drawing.Size(0, 13);
+            this.statuslabel_2.TabIndex = 4;
+            // 
             // Form1
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
@@ -1539,6 +1652,11 @@
             this.leaderboard_page.ResumeLayout(false);
             this.tableLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel2.PerformLayout();
+            this.setting_page.ResumeLayout(false);
+            this.groupBox8.ResumeLayout(false);
+            this.groupBox8.PerformLayout();
+            this.groupBox7.ResumeLayout(false);
+            this.groupBox7.PerformLayout();
             this.userbox.ResumeLayout(false);
             this.userbox.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).EndInit();
@@ -1664,6 +1782,16 @@
         private System.Windows.Forms.Button msg_send;
         private System.Windows.Forms.TextBox msg_text;
         private System.Windows.Forms.RichTextBox msg_box;
+        private System.Windows.Forms.GroupBox groupBox8;
+        private System.Windows.Forms.TextBox oldpassword2;
+        private System.Windows.Forms.TextBox newemail;
+        private System.Windows.Forms.Button settings_2;
+        private System.Windows.Forms.GroupBox groupBox7;
+        private System.Windows.Forms.TextBox oldpassword1;
+        private System.Windows.Forms.TextBox newpassword;
+        private System.Windows.Forms.Button settings_1;
+        private System.Windows.Forms.Label statuslabel_2;
+        private System.Windows.Forms.Label statuslabel_1;
 
 
 

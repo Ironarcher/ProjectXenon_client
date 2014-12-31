@@ -329,23 +329,32 @@ namespace Curry_Server
         }
         public static void setPassword(int id, String value)
         {
-            XmlDocument doc = new XmlDocument();
-            doc.Load(userXML);
-            XmlNodeList elemList = doc.GetElementsByTagName("user");
-            for (int i = 0; i < elemList.Count; i++)
-            {
-                XmlNode x = elemList.Item(i);
-                if (x.NodeType == XmlNodeType.Element)
+            try{
+                XmlDocument doce = new XmlDocument();
+                doce.Load(userXML);
+                /*
+                XmlNodeList elemList = doce.GetElementsByTagName("user");
+                for (int i = 0; i < elemList.Count; i++)
                 {
-                    XmlElement e = (XmlElement)x;
-                    int tid = Int32.Parse(e.GetAttribute("id"));
-                    if (id == tid)
+                    XmlNode x = elemList.Item(i);
+                    if (x.NodeType == XmlNodeType.Element)
                     {
-                        e.ChildNodes.Item(2).FirstChild.Value = value;
+                        XmlElement e = (XmlElement)x;
+                        int tid = Int32.Parse(e.GetAttribute("id"));
+                        if (id == tid)
+                        {
+                            e.ChildNodes.Item(2).FirstChild.Value = value;
+                        }
                     }
                 }
+                 */
+                doce.Save(userXML);
+                
             }
-            doc.Save(userXML);
+            catch (Exception aa)
+            {
+                Console.WriteLine(aa.ToString());
+            }
         }
         public static void setSuperUser(int id, bool value)
         {
