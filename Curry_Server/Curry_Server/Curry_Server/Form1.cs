@@ -92,7 +92,7 @@ namespace Curry_Server
 
         private void promote_button_Click(object sender, EventArgs e)
         {
-            User.setFirstName(1, "Arpad");
+            //User.setFirstName(1, "Arpad");
             int promoteduserid = User.getID(first_promote.Text, last_promote.Text);
             Console.WriteLine(promoteduserid);
             if (!User.getSuperUser(promoteduserid))
@@ -109,7 +109,7 @@ namespace Curry_Server
 
         private void demote_button_Click(object sender, EventArgs e)
         {
-            int demoteduserid = User.getID(first_demote.Text, last_demote.Text);
+            int demoteduserid = User.getID(first_promote.Text, last_promote.Text);
             if (User.getSuperUser(demoteduserid))
             {
                 User.setSuperUser(demoteduserid, false);
@@ -120,6 +120,13 @@ namespace Curry_Server
                 Console.WriteLine("Not a superuser to begin with");
             }
         }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            string input = Microsoft.VisualBasic.Interaction.InputBox("Enter Password", "Password", "password", -1, -1);
+            User.createUser(first_promote.Text, last_promote.Text, "password", false);
+        }
+
     }
 
     // State object for reading client data asynchronously
