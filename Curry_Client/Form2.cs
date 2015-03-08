@@ -325,6 +325,8 @@ namespace Curry_Client
             //Write dictionary of servers to connect to
             //Pull from master server (list of servers to connect to)
             addServer("Localhost", "127.0.0.1");
+            addServer("CentralDev", "108.248.159.5");
+            addServer("CentralDev2", "192.168.1.254");
             /*
             foreach (String s in masterServerList.Keys)
             {
