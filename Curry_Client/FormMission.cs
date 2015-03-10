@@ -284,7 +284,7 @@ namespace Curry_Client
         {
             //Send to the Mission Detail form
             Mission createdMission = new Mission(missiontype);
-            createdMission.questions = questionList.ToArray();
+            createdMission.questions = questionList;
             MissionDetail mdform = new MissionDetail(mainForm, createdMission);
             mdform.ShowDialog();
             this.Close();

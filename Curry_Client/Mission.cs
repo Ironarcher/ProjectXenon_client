@@ -53,21 +53,26 @@ namespace Curry_Client
                 chosenAnswer = 'd';
             }
         }
+        public int getCorrectAnswer()
+        {
+            return correctAnswer;
+        }
     }
     [Serializable]
     class Mission
     {
-        public int xpreward = 0;
-        public int goldreward = 0;
         public Mission(EnumMission mtype)
         {
             this.type = mtype;
         }
+        public Mission() { }
+        public int xpreward = 0;
+        public int goldreward = 0;
         public DateTime missionStart, missionEnd;
         public int lvlStartEligible, lvlEndEligible;
         public EnumMission type;
         public String title;
-        public Question[] questions;
+        public List<Question> questions;
         public bool AutoGrade
         {
             get { return this.type == EnumMission.MultipleChoice; }

@@ -47,6 +47,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="MissionLibrary">
+      <HintPath>.\MissionLibrary.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Messaging" />
@@ -73,6 +76,7 @@
     <Compile Include="Form2.Designer.cs">
       <DependentUpon>Form2.cs</DependentUpon>
     </Compile>
+    <Compile Include="Mission.cs" />
     <Compile Include="MissionDetail.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -91,7 +95,6 @@
     <Compile Include="FormSuperUser.Designer.cs">
       <DependentUpon>FormSuperUser.cs</DependentUpon>
     </Compile>
-    <Compile Include="Mission.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Form1.resx">
@@ -163,6 +166,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\plaque3.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
