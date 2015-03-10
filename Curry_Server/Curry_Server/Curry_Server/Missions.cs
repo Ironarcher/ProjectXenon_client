@@ -89,6 +89,80 @@ namespace Curry_Server
 
             
         }
+        public static Mission getMissionById(int id)
+        {
+            Mission m = new Mission();
+            XmlDocument doc = new XmlDocument();
+            doc.Load(userXML);
+            XmlNodeList elemList = doc.GetElementsByTagName("user");
+            for (int i = 0; i < elemList.Count; i++)
+            {
+                XmlNode x = elemList.Item(i);
+                if (x.NodeType == XmlNodeType.Element)
+                {
+                    XmlElement e = (XmlElement)x;
+                    int tid = Int32.Parse(e.GetAttribute("id"));
+                    if (id == tid)
+                    {
+                        if(e.ChildNodes.Item(1).FirstChild.Value == "MultipleChoice") m.type = EnumMission.MultipleChoice;
+                        else if(e.ChildNodes.Item(1).FirstChild.Value == "FileUpload") m.type = EnumMission.FileUpload;
+                        else if(e.ChildNodes.Item(1).FirstChild.Value == "FreeResponse") m.type = EnumMission.FreeResponse;
+                        else if(e.ChildNodes.Item(1).FirstChild.Value == "Text") m.type = EnumMission.Text;
+                        m.title = e.ChildNodes.Item(0).FirstChild.Value;
+                        m.lvlStartEligible = Int32.Parse(e.ChildNodes.Item(2).FirstChild.Value);
+                        m.lvlEndEligible = Int32.Parse(e.ChildNodes.Item(3).FirstChild.Value);
+                        m.missionStart = DateTime.Parse(e.ChildNodes.Item(4).FirstChild.Value);
+                        m.missionEnd = DateTime.Parse(e.ChildNodes.Item(5).FirstChild.Value);
+                        m.xpreward = Int32.Parse(e.ChildNodes.Item(6).FirstChild.Value);
+                        m.goldreward = Int32.Parse(e.ChildNodes.Item(7).FirstChild.Value);
+
+                        //Translate the questions
+                        int currentnumber = 8;
+                        while(e.ChildNodes.Item(currentnumber).FirstChild.Name == "question")
+                        {
+                            XmlNode questionnode = e.ChildNodes.Item(currentnumber).FirstChild;
+                            if(questionnode.NodeType == XmlNodeType.Element)
+                            {
+                                XmlElement questione = (XmlElement)questionnode;
+                                //Params: Prompt, AnswerA, AnswerB, AnswerC, AnswerD, correctanswer (int32)
+                                Question q = new Question(questione.ChildNodes.Item(0).FirstChild.Value,
+                                    questione.ChildNodes.Item(1).FirstChild.Value,
+                                    questione.ChildNodes.Item(2).FirstChild.Value,
+                                    questione.ChildNodes.Item(3).FirstChild.Value,
+                                    questione.ChildNodes.Item(4).FirstChild.Value,
+                                    Int32.Parse(questione.ChildNodes.Item(5).FirstChild.Value));
+                                m.questions.Add(q);
+                            }
+                            currentnumber++;
+                        }
+                    }
+                }
+            }
+            return m;
+        }
+        //Gets list of all missions in the server database
+        public static List<Mission> getMissionList()
+        {
+            List<Mission> mlist = new List<Mission>();
+
+            XmlDocument doc = new XmlDocument();
+            doc.Load(userXML);
+            XmlNodeList elemList = doc.GetElementsByTagName("mission");
+            for (int i = 0; i < elemList.Count; i++)
+            {
+                mlist.Add(getMissionById(i + 1));
+            }
+            return mlist;
+        }
+        public static int getMissionNumber()
+        {
+            List<Mission> mlist = new List<Mission>();
+
+            XmlDocument doc = new XmlDocument();
+            doc.Load(userXML);
+            XmlNodeList elemList = doc.GetElementsByTagName("mission");
+            return elemList.Count;
+        }
         public static String getLevelCap()
         {
             XmlDocument doc = new XmlDocument();

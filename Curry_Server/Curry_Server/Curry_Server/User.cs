@@ -231,6 +231,22 @@ namespace Curry_Server
             avatarchild.AppendChild(doc.CreateTextNode("None"));
             XmlElement emailchild = doc.CreateElement("email");
             emailchild.AppendChild(doc.CreateTextNode("None"));
+            for (int i = 0; i < Missions.getMissionNumber(); i++)
+            {
+                XmlElement nodee = doc.CreateElement("mission");
+                XmlAttribute nodea = doc.CreateAttribute("id");
+                nodea.Value = i.ToString();
+                nodee.Attributes.Append(nodea);
+
+                XmlElement gradechild = doc.CreateElement("grade");
+                gradechild.AppendChild(doc.CreateTextNode("N/A"));
+                XmlElement attemptschild = doc.CreateElement("attempts");
+                attemptschild.AppendChild(doc.CreateTextNode("0"));
+                nodee.AppendChild(gradechild);
+                nodee.AppendChild(attemptschild);
+
+                e.AppendChild(nodee);
+            }
             e.AppendChild(fchild);
             e.AppendChild(lchild);
             e.AppendChild(pchild);
