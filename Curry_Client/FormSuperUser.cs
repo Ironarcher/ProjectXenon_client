@@ -220,7 +220,7 @@ namespace Curry_Client
             byte[] lvlstart = Encoding.ASCII.GetBytes(mission.lvlEndEligible.ToString());
             byte[] lvlend = Encoding.ASCII.GetBytes(mission.lvlEndEligible.ToString());
 
-            byte[] packet = new byte[11 + questions.Length + missionstart.Length + missionend.Length + missiontitle.Length +
+            byte[] packet = new byte[19 + questions.Length + missionstart.Length + missionend.Length + missiontitle.Length +
                 xp.Length + gold.Length + lvlstart.Length + lvlend.Length]; //16 kilobyte byte array (will be trimmed)
             packet[0] = 13; //for creating a mission
             packet[1] = logincode[0];
@@ -242,16 +242,24 @@ namespace Curry_Client
                     break;
             }
             xp.CopyTo(packet, 5);
-            gold.CopyTo(packet, 5 + xp.Length);
-            missionstart.CopyTo(packet, 5 + xp.Length + gold.Length);
-            missionend.CopyTo(packet, 5 + xp.Length + gold.Length + missionstart.Length);
-            lvlstart.CopyTo(packet, 5 + xp.Length + gold.Length + missionstart.Length + missionend.Length);
-            lvlend.CopyTo(packet, 5 + xp.Length + gold.Length + missionstart.Length + missionend.Length + lvlstart.Length);
-            missiontitle.CopyTo(packet, 5 + xp.Length + gold.Length + missionstart.Length + missionend.Length + lvlstart.Length + lvlend.Length);
-            questionsfnl.CopyTo(packet, 5 + xp.Length + gold.Length + missionstart.Length + missionend.Length + lvlstart.Length + lvlend.Length + missiontitle.Length);
-            packet[5 + xp.Length + gold.Length + missionstart.Length + missionend.Length + lvlstart.Length + lvlend.Length + missiontitle.Length + questionsfnl.Length] = Convert.ToByte(mission.AutoGrade);
+            Encoding.ASCII.GetBytes("\0").CopyTo(packet, 5 + xp.Length);
+            gold.CopyTo(packet, 6 + xp.Length);
+            Encoding.ASCII.GetBytes("\0").CopyTo(packet, 6 + xp.Length + gold.Length);
+            missionstart.CopyTo(packet, 7 + xp.Length + gold.Length);
+            Encoding.ASCII.GetBytes("\0").CopyTo(packet, 7 + xp.Length + gold.Length + missionstart.Length);
+            missionend.CopyTo(packet, 8 + xp.Length + gold.Length + missionstart.Length);
+            Encoding.ASCII.GetBytes("\0").CopyTo(packet, 8 + xp.Length + gold.Length + missionstart.Length + missionend.Length);
+            lvlstart.CopyTo(packet, 9 + xp.Length + gold.Length + missionstart.Length + missionend.Length);
+            Encoding.ASCII.GetBytes("\0").CopyTo(packet, 9 + xp.Length + gold.Length + missionstart.Length + missionend.Length + lvlstart.Length);
+            lvlend.CopyTo(packet, 10 + xp.Length + gold.Length + missionstart.Length + missionend.Length + lvlstart.Length);
+            Encoding.ASCII.GetBytes("\0").CopyTo(packet, 10 + xp.Length + gold.Length + missionstart.Length + missionend.Length + lvlstart.Length + lvlend.Length);
+            missiontitle.CopyTo(packet, 11 + xp.Length + gold.Length + missionstart.Length + missionend.Length + lvlstart.Length + lvlend.Length);
+            Encoding.ASCII.GetBytes("\0").CopyTo(packet, 11 + xp.Length + gold.Length + missionstart.Length + missionend.Length + lvlstart.Length + lvlend.Length + missiontitle.Length);
+            questionsfnl.CopyTo(packet, 12 + xp.Length + gold.Length + missionstart.Length + missionend.Length + lvlstart.Length + lvlend.Length + missiontitle.Length);
+            Encoding.ASCII.GetBytes("\0").CopyTo(packet, 12 + xp.Length + gold.Length + missionstart.Length + missionend.Length + lvlstart.Length + lvlend.Length + missiontitle.Length + questionsfnl.Length);
+            packet[13 + xp.Length + gold.Length + missionstart.Length + missionend.Length + lvlstart.Length + lvlend.Length + missiontitle.Length + questionsfnl.Length] = Convert.ToByte(mission.AutoGrade);
             byte[] temp = Encoding.ASCII.GetBytes("<EOF>");
-            temp.CopyTo(packet, 6 + xp.Length + gold.Length + missionstart.Length + missionend.Length + lvlstart.Length + lvlend.Length + missiontitle.Length + questionsfnl.Length);
+            temp.CopyTo(packet, 14 + xp.Length + gold.Length + missionstart.Length + missionend.Length + lvlstart.Length + lvlend.Length + missiontitle.Length + questionsfnl.Length);
             connect(ServerIP, packet);
         }
 
