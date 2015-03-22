@@ -153,50 +153,108 @@ namespace Curry_Client
 
         internal void createMission(Mission mission)
         {
-            Object obj = (Object)mission;
-            byte[] missionpacket = ObjectToByteArray(obj);
-            byte[] packet = new byte[9 + missionpacket.Length];
-            packet[0] = 13;
+            //Creates byte array for questions
+            int questionnumber = mission.questions.Count;
+            byte[] questions = new byte[16384];
+            int index = 1;
+            Encoding.ASCII.GetBytes("\0").CopyTo(questions, 0);
+            byte[] sep = Encoding.ASCII.GetBytes("US");
+            //For testing ONLY: delete later
+            if (sep.Length != 1) Console.WriteLine("CRITICAL ERROR in createMission()");
+            for (int i = 0; i < questionnumber; i++)
+            {
+                byte[] prompt = Encoding.ASCII.GetBytes(mission.questions[i].getPrompt());
+                prompt.CopyTo(questions, index);
+                index += prompt.Length;
+                sep.CopyTo(questions, index);
+                index += 1;
+
+                byte[] answera = Encoding.ASCII.GetBytes(mission.questions[i].getAnswers()[0]);
+                answera.CopyTo(questions, index);
+                index += answera.Length;
+                sep.CopyTo(questions, index);
+                index += 1;
+
+                byte[] answerb = Encoding.ASCII.GetBytes(mission.questions[i].getAnswers()[1]);
+                answerb.CopyTo(questions, index);
+                index += answerb.Length;
+                sep.CopyTo(questions, index);
+                index += 1;
+
+                byte[] answerc = Encoding.ASCII.GetBytes(mission.questions[i].getAnswers()[2]);
+                answerc.CopyTo(questions, index);
+                index += answerc.Length;
+                sep.CopyTo(questions, index);
+                index += 1;
+
+                byte[] answerd = Encoding.ASCII.GetBytes(mission.questions[i].getAnswers()[3]);
+                answerd.CopyTo(questions, index);
+                index += answerd.Length;
+                sep.CopyTo(questions, index);
+                index += 1;
+
+                byte[] chosenanswer = Encoding.ASCII.GetBytes(mission.questions[i].getChosenAnswer().ToString());
+                chosenanswer.CopyTo(questions, index);
+                index += chosenanswer.Length;
+                sep.CopyTo(questions, index);
+                index += 1;
+
+                byte[] correctanswer = Encoding.ASCII.GetBytes(mission.questions[i].getCorrectAnswer().ToString());
+                correctanswer.CopyTo(questions, index);
+                index += correctanswer.Length;
+                sep.CopyTo(questions, index);
+                index += 1;
+
+                Encoding.ASCII.GetBytes("\0").CopyTo(questions, index);
+                index += 1;
+            }
+            byte[] questionsfnl = new byte[index+1];
+            questions.CopyTo(questionsfnl, 0);
+
+            //Get Date-time byte arrays and title byte array
+            byte[] missionstart = BitConverter.GetBytes(mission.missionStart.Ticks);
+            byte[] missionend = BitConverter.GetBytes(mission.missionEnd.Ticks);
+            byte[] missiontitle = Encoding.ASCII.GetBytes(mission.title);
+            byte[] xp = Encoding.ASCII.GetBytes(mission.xpreward.ToString());
+            byte[] gold = Encoding.ASCII.GetBytes(mission.goldreward.ToString());
+            byte[] lvlstart = Encoding.ASCII.GetBytes(mission.lvlEndEligible.ToString());
+            byte[] lvlend = Encoding.ASCII.GetBytes(mission.lvlEndEligible.ToString());
+
+            byte[] packet = new byte[11 + questions.Length + missionstart.Length + missionend.Length + missiontitle.Length +
+                xp.Length + gold.Length + lvlstart.Length + lvlend.Length]; //16 kilobyte byte array (will be trimmed)
+            packet[0] = 13; //for creating a mission
             packet[1] = logincode[0];
             packet[2] = logincode[1];
             packet[3] = logincode[2];
-            missionpacket.CopyTo(packet, 4);
+            switch (mission.type)
+            {
+                case EnumMission.FileUpload: 
+                    packet[4] = 1;
+                    break;
+                case EnumMission.FreeResponse: 
+                    packet[4] = 2;
+                    break;
+                case EnumMission.MultipleChoice:
+                    packet[4] = 3;
+                    break;
+                case EnumMission.Text: 
+                    packet[4] = 4;
+                    break;
+            }
+            xp.CopyTo(packet, 5);
+            gold.CopyTo(packet, 5 + xp.Length);
+            missionstart.CopyTo(packet, 5 + xp.Length + gold.Length);
+            missionend.CopyTo(packet, 5 + xp.Length + gold.Length + missionstart.Length);
+            lvlstart.CopyTo(packet, 5 + xp.Length + gold.Length + missionstart.Length + missionend.Length);
+            lvlend.CopyTo(packet, 5 + xp.Length + gold.Length + missionstart.Length + missionend.Length + lvlstart.Length);
+            missiontitle.CopyTo(packet, 5 + xp.Length + gold.Length + missionstart.Length + missionend.Length + lvlstart.Length + lvlend.Length);
+            questionsfnl.CopyTo(packet, 5 + xp.Length + gold.Length + missionstart.Length + missionend.Length + lvlstart.Length + lvlend.Length + missiontitle.Length);
+            packet[5 + xp.Length + gold.Length + missionstart.Length + missionend.Length + lvlstart.Length + lvlend.Length + missiontitle.Length + questionsfnl.Length] = Convert.ToByte(mission.AutoGrade);
             byte[] temp = Encoding.ASCII.GetBytes("<EOF>");
-            temp.CopyTo(packet, 4 + missionpacket.Length);
+            temp.CopyTo(packet, 6 + xp.Length + gold.Length + missionstart.Length + missionend.Length + lvlstart.Length + lvlend.Length + missiontitle.Length + questionsfnl.Length);
             connect(ServerIP, packet);
         }
 
-        /*
-        private void sendStringPacket()
-        {
-            byte[] packet = new byte[60];
-            //packet type 6 is a string array exchange for user control
-            //packet bytes 1-3 are authorization bytes
-            packet[0] = 6;
-            packet[1] = logincode[0];
-            packet[2] = logincode[1];
-            packet[3] = logincode[2];
-            Console.WriteLine("Verification code: " + Convert.ToInt32(logincode[0]) + Convert.ToInt32(logincode[1]) + Convert.ToInt32(logincode[2]));
-            byte[] fnl = Encoding.ASCII.GetBytes("\0");
-            fnl.CopyTo(packet, 4);
-            //Insert string payload here:
-            String[] arpayload = new String[1];
-            arpayload[0] = "null";
-            int arcount = 5;
-            foreach (String s in arpayload)
-            {
-                if(s != null  || s != String.Empty){
-                    byte[] tempa = Encoding.ASCII.GetBytes(s);
-                    tempa.CopyTo(packet, arcount);
-                    fnl.CopyTo(packet, tempa.Length + arcount + 1);
-                    arcount += tempa.Length+2;
-                }
-            }
-            byte[] tempb = Encoding.ASCII.GetBytes("<EOF>");
-            tempb.CopyTo(packet, arcount);
-            connect(ServerIP, packet);
-        }
-        */
         //IP_AD is the IP address of the server
         private static void connect(string IP_AD, byte[] data)
         {

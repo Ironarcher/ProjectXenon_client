@@ -15,9 +15,9 @@ namespace Curry_Server
         private String AnswerC;
         private String AnswerD;
         private char chosenAnswer;
-        private int correctAnswer;
+        private char correctAnswer;
         //Multiple Choice Only
-        public Question(String tprompt, String aa, String ab, String ac, String ad, int correctanswer)
+        public Question(String tprompt, String aa, String ab, String ac, String ad, char correctanswer)
         {
             prompt = tprompt;
             AnswerA = aa;
@@ -25,6 +25,7 @@ namespace Curry_Server
             AnswerC = ac;
             AnswerD = ad;
             correctAnswer = correctanswer;
+            chosenAnswer = '0';
         }
         public String getPrompt()
         {
@@ -53,9 +54,13 @@ namespace Curry_Server
                 chosenAnswer = 'd';
             }
         }
-        public int getCorrectAnswer()
+        public char getCorrectAnswer()
         {
             return correctAnswer;
+        }
+        public char getChosenAnswer()
+        {
+            return chosenAnswer;
         }
     }
     [Serializable]
